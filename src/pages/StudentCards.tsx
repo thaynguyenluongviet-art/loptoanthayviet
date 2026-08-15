@@ -52,7 +52,7 @@ function StudentCard({ student, centerName, classInfo, theme }) {
             fontSize: '14px', // TĂNG SIZE: từ 12px -> 14px
             fontWeight: 900, lineHeight: 1.2, maxWidth: '55mm' 
           }}>
-            {centerName || 'LỚP TOÁN THẦY LĨNH'}
+            {centerName}
           </div>
           {classInfo?.subject && (
             <div style={{ 
@@ -144,7 +144,7 @@ export default function StudentCards() {
   const [students, setStudents]       = useState([])
   const [enrollments, setEnrollments] = useState([])
   const [selectedClass, setSelectedClass] = useState('')
-  const [centerName, setCenterName]       = useState('')
+  const [centerName, setCenterName]       = useState(import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET')
   const [theme, setTheme]                 = useState('teal')
   const [loading, setLoading]             = useState(true)
   const [error, setError]                 = useState('')

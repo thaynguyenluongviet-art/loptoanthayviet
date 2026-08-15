@@ -144,7 +144,7 @@ export default function StudentCards() {
   const [students, setStudents]       = useState([])
   const [enrollments, setEnrollments] = useState([])
   const [selectedClass, setSelectedClass] = useState('')
-  const [centerName, setCenterName]       = useState(import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET')
+  const [centerName, setCenterName]       = useState(import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT')
   const [theme, setTheme]                 = useState('teal')
   const [loading, setLoading]             = useState(true)
   const [error, setError]                 = useState('')

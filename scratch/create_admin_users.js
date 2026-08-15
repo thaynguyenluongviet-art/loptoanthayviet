@@ -28,11 +28,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
-async function main() {
-  const email = 'admin@toanthayviet.com';
-  const password = 'ThayViet@2026';
-  
-  console.log(`Creating/updating user ${email}...`);
+async function createAdmin(email, password, name) {
+  console.log(`Creating/updating admin user: ${email}...`);
   
   // Try to find if user exists in profiles first
   const { data: profile } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
@@ -53,7 +50,7 @@ async function main() {
       email,
       password,
       email_confirm: true,
-      user_metadata: { name: 'Thầy Việt Admin' }
+      user_metadata: { name: name }
     });
     
     if (createError) {
@@ -69,7 +66,7 @@ async function main() {
   const { error: upsertError } = await supabase.from('profiles').upsert({
     id: userId,
     email,
-    name: 'Thầy Việt Admin',
+    name: name,
     role: 'ADMIN',
     active: true
   });
@@ -77,8 +74,19 @@ async function main() {
   if (upsertError) {
     console.error('Error upserting profile:', upsertError);
   } else {
-    console.log('Profile updated to ADMIN successfully.');
+    console.log(`Profile ${email} updated to ADMIN successfully.\n`);
   }
+}
+
+async function main() {
+  const password = '12345678';
+  const name = 'Thầy Nguyễn Lương Việt';
+  
+  // Create both variations to handle typos
+  await createAdmin('thaynguyenluongviet@gmail.com', password, name);
+  await createAdmin('thaynguyenluongivet@gmail.com', password, name);
+  
+  console.log('Done!');
 }
 
 main();

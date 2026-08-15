@@ -49,7 +49,7 @@ export default function Login() {
               <GraduationCap className="w-9 h-9 text-white" />
             </div>
             <h1 className="text-white font-extrabold text-2xl tracking-wide">
-              {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET'}
+              {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT'}
             </h1>
             <p className="text-white/75 text-sm mt-1 uppercase tracking-widest text-xs font-semibold">Hệ thống quản lý trung tâm</p>
           </div>

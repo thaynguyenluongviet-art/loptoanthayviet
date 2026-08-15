@@ -75,7 +75,7 @@ export default function Layout() {
           <GraduationCap className="w-8 h-8 text-teal-100" />
           <div>
             <h1 className="font-bold text-sm leading-tight uppercase tracking-wider">
-              {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET'}
+              {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT'}
             </h1>
             <p className="text-[9px] text-teal-200 uppercase tracking-widest mt-0.5">Hệ thống Quản lý</p>
           </div>

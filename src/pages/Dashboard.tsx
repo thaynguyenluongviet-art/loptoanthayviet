@@ -259,7 +259,7 @@ export default function Dashboard() {
       <div className="page-header">
         <div>
           <h1 className="section-title">
-            {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET'}
+            {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT'}
           </h1>
           <p className="text-gray-500 text-sm mt-0.5">
             Xin chào, <strong>{profile?.name ?? profile?.email}</strong> 👋

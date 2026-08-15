@@ -472,7 +472,7 @@ export default function StudentPortal() {
                 <GraduationCap className="w-9 h-9 text-white" />
               </div>
               <h1 className="font-extrabold text-2xl tracking-wide uppercase">
-                {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET'}
+                {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT'}
               </h1>
               <h2 className="text-white/90 font-bold text-lg mt-1">Bài Tập Về Nhà</h2>
               <p className="text-white/75 text-xs mt-2 italic max-w-xs mx-auto leading-relaxed">
@@ -540,7 +540,7 @@ export default function StudentPortal() {
             </form>
           </div>
           <p className="text-center text-white/60 text-xs mt-4">
-            © 2025 {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET'} – Powered by React + Supabase
+            © 2025 {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT'} – Powered by React + Supabase
           </p>
         </div>
       </div>
@@ -643,7 +643,7 @@ export default function StudentPortal() {
             </div>
             <div>
               <h1 className="font-extrabold text-base leading-tight text-teal-800 uppercase tracking-wide">
-                {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET'}
+                {import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT'}
               </h1>
               <p className="text-[10px] font-bold uppercase tracking-wider text-teal-500">Cổng Thi Học Sinh</p>
             </div>

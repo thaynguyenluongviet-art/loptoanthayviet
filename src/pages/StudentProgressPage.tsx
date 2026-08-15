@@ -16,7 +16,7 @@ export default function StudentProgressPage() {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [courseProgress, setCourseProgress] = useState<any[]>([])
   const [tuitionNotifications, setTuitionNotifications] = useState<any[]>([])
-  const [centerName]   = useState(import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIET')
+  const [centerName]   = useState(import.meta.env.VITE_CENTER_NAME || 'LỚP TOÁN THẦY VIỆT')
   const [loading, setLoading]   = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [expandedSub, setExpandedSub] = useState<number | null>(null)

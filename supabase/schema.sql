@@ -128,6 +128,7 @@ create table if not exists email_logs (
 );
 
 -- ── Row Level Security ──────────────────────────────────────
+-- ── Row Level Security ──────────────────────────────────────
 alter table profiles   enable row level security;
 alter table students   enable row level security;
 alter table classes    enable row level security;
@@ -136,6 +137,25 @@ alter table attendance enable row level security;
 alter table payments   enable row level security;
 alter table email_logs enable row level security;
 alter table teacher_classes enable row level security;
+
+-- Drop existing policies if they exist to prevent errors on rerun
+drop policy if exists "auth read profiles"    on profiles;
+drop policy if exists "auth read students"    on students;
+drop policy if exists "auth read classes"     on classes;
+drop policy if exists "auth read enrollments" on enrollments;
+drop policy if exists "auth read attendance"  on attendance;
+drop policy if exists "auth read payments"    on payments;
+drop policy if exists "auth read email_logs"  on email_logs;
+drop policy if exists "auth read tc"          on teacher_classes;
+
+drop policy if exists "auth write students"   on students;
+drop policy if exists "auth write classes"    on classes;
+drop policy if exists "auth write enrollments" on enrollments;
+drop policy if exists "auth write attendance" on attendance;
+drop policy if exists "auth write payments"   on payments;
+drop policy if exists "auth write email_logs" on email_logs;
+drop policy if exists "auth write tc"         on teacher_classes;
+drop policy if exists "auth write profiles"   on profiles;
 
 -- All authenticated users can read
 create policy "auth read profiles"   on profiles   for select using (auth.role() = 'authenticated');
@@ -175,8 +195,12 @@ create table if not exists tuition_notifications (
 
 alter table tuition_notifications enable row level security;
 
+drop policy if exists "Allow read tuition_notifications" on tuition_notifications;
+drop policy if exists "Allow write tuition_notifications" on tuition_notifications;
+
 create policy "Allow read tuition_notifications" on tuition_notifications
   for select using (true);
 
 create policy "Allow write tuition_notifications" on tuition_notifications
   for all using (auth.role() = 'authenticated');
+

@@ -235,7 +235,7 @@ export default function Classes() {
               >
                 Tất cả
               </button>
-              {['6', '7', '8', '9'].map(grade => (
+              {['6', '7', '8', '9', '10', '11', '12'].map(grade => (
                 <button
                   key={grade}
                   onClick={() => setSelectedGrade(grade)}
@@ -505,6 +505,9 @@ export default function Classes() {
               <option value="7">Khối 7</option>
               <option value="8">Khối 8</option>
               <option value="9">Khối 9</option>
+              <option value="10">Khối 10</option>
+              <option value="11">Khối 11</option>
+              <option value="12">Khối 12</option>
             </select>
           </div>
 

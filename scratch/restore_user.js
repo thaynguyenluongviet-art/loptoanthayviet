@@ -28,32 +28,28 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
-async function createOrLinkAdmin(email, password, name) {
-  console.log(`Setting up admin: ${email}...`);
+async function main() {
+  const email = 'linhdc140594@gmail.com';
+  const password = 'Linh1994@';
+  const name = 'Thầy Linh';
+  
+  console.log(`Restoring admin user: ${email}...`);
+  
+  // Try to find if user exists in profiles first
+  const { data: profile } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
   
   let userId;
-  
-  // 1. Check if user already exists in auth.users by listing them
-  const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-  if (listError) {
-    console.error('Error listing auth users:', listError.message);
-    return;
-  }
-  
-  const existingUser = users.find(u => u.email === email);
-  
-  if (existingUser) {
-    console.log(`User already exists in Supabase Auth (ID: ${existingUser.id}).`);
-    userId = existingUser.id;
-    // Update password just in case
+  if (profile) {
+    console.log(`User already exists in profiles (ID: ${profile.id}). Updating password...`);
+    userId = profile.id;
     const { error: updateError } = await supabase.auth.admin.updateUserById(userId, { password });
     if (updateError) {
-      console.log('Note: Could not update password (may require email confirmation to be toggled):', updateError.message);
+      console.error('Error updating password:', updateError);
     } else {
-      console.log('Password set successfully.');
+      console.log('Password updated successfully.');
     }
   } else {
-    // 2. Create the user if they don't exist
+    // Create auth user
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -62,7 +58,7 @@ async function createOrLinkAdmin(email, password, name) {
     });
     
     if (createError) {
-      console.error(`Error creating user ${email} in auth:`, createError.message);
+      console.error('Error creating user in auth:', createError);
       return;
     }
     
@@ -70,7 +66,7 @@ async function createOrLinkAdmin(email, password, name) {
     console.log(`Auth user created successfully (ID: ${userId}).`);
   }
   
-  // 3. Upsert the profile record in public.profiles table with ADMIN role
+  // Make sure the profile has ADMIN role
   const { error: upsertError } = await supabase.from('profiles').upsert({
     id: userId,
     email,
@@ -80,20 +76,10 @@ async function createOrLinkAdmin(email, password, name) {
   });
   
   if (upsertError) {
-    console.error('Error upserting profile:', upsertError.message);
+    console.error('Error upserting profile:', upsertError);
   } else {
-    console.log(`Profile for ${email} updated as ADMIN successfully.\n`);
+    console.log(`Profile ${email} restored as ADMIN successfully.`);
   }
-}
-
-async function main() {
-  const password = '12345678';
-  const name = 'Thầy Nguyễn Lương Việt';
-  
-  await createOrLinkAdmin('thaynguyenluongviet@gmail.com', password, name);
-  await createOrLinkAdmin('thaynguyenluongivet@gmail.com', password, name);
-  
-  console.log('Done!');
 }
 
 main();

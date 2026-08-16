@@ -119,12 +119,18 @@ export default function ExamRoomsMgmt() {
       if (gradeStr.includes('7') || gradeStr === '7') return 7
       if (gradeStr.includes('8') || gradeStr === '8') return 8
       if (gradeStr.includes('9') || gradeStr === '9') return 9
+      if (gradeStr.includes('10') || gradeStr === '10') return 10
+      if (gradeStr.includes('11') || gradeStr === '11') return 11
+      if (gradeStr.includes('12') || gradeStr === '12') return 12
 
       const className = ((roomClass.class_name || roomClass.name || '') as string).toLowerCase()
       if (className.includes('lớp 6') || className.includes('khối 6') || className.includes('toán 6') || /\b6\b/.test(className)) return 6
       if (className.includes('lớp 7') || className.includes('khối 7') || className.includes('toán 7') || /\b7\b/.test(className)) return 7
       if (className.includes('lớp 8') || className.includes('khối 8') || className.includes('toán 8') || /\b8\b/.test(className)) return 8
       if (className.includes('lớp 9') || className.includes('khối 9') || className.includes('toán 9') || /\b9\b/.test(className)) return 9
+      if (className.includes('lớp 10') || className.includes('khối 10') || className.includes('toán 10') || /\b10\b/.test(className)) return 10
+      if (className.includes('lớp 11') || className.includes('khối 11') || className.includes('toán 11') || /\b11\b/.test(className)) return 11
+      if (className.includes('lớp 12') || className.includes('khối 12') || className.includes('toán 12') || /\b12\b/.test(className)) return 12
     }
 
     const examTitle = (room.exams?.title || '').toLowerCase()
@@ -132,11 +138,14 @@ export default function ExamRoomsMgmt() {
     if (examTitle.includes('lớp 7') || examTitle.includes('khối 7') || examTitle.includes('toán 7') || examTitle.includes('khối bảy') || /\b(khối\s+)?7\b/.test(examTitle)) return 7
     if (examTitle.includes('lớp 8') || examTitle.includes('khối 8') || examTitle.includes('toán 8') || examTitle.includes('khối tám') || /\b(khối\s+)?8\b/.test(examTitle)) return 8
     if (examTitle.includes('lớp 9') || examTitle.includes('khối 9') || examTitle.includes('toán 9') || examTitle.includes('khối chín') || /\b(khối\s+)?9\b/.test(examTitle)) return 9
+    if (examTitle.includes('lớp 10') || examTitle.includes('khối 10') || examTitle.includes('toán 10') || examTitle.includes('khối mười') || /\b(khối\s+)?10\b/.test(examTitle)) return 10
+    if (examTitle.includes('lớp 11') || examTitle.includes('khối 11') || examTitle.includes('toán 11') || examTitle.includes('khối mười một') || /\b(khối\s+)?11\b/.test(examTitle)) return 11
+    if (examTitle.includes('lớp 12') || examTitle.includes('khối 12') || examTitle.includes('toán 12') || examTitle.includes('khối mười hai') || /\b(khối\s+)?12\b/.test(examTitle)) return 12
 
     return null
   }
 
-  const displayGrades = [6, 7, 8, 9]
+  const displayGrades = [6, 7, 8, 9, 10, 11, 12]
   const hasOtherRooms = rooms.some(room => {
     const grade = getRoomGrade(room)
     return grade === null || !displayGrades.includes(grade)
@@ -178,7 +187,7 @@ export default function ExamRoomsMgmt() {
 
   useEffect(() => {
     if (rooms.length > 0 && !rooms.some(r => getRoomGrade(r) === activeGrade)) {
-      const gradesWithRooms = [6, 7, 8, 9].filter(g => rooms.some(r => getRoomGrade(r) === g))
+      const gradesWithRooms = [6, 7, 8, 9, 10, 11, 12].filter(g => rooms.some(r => getRoomGrade(r) === g))
       if (gradesWithRooms.length > 0) {
         setActiveGrade(gradesWithRooms[0])
       } else if (hasOtherRooms) {
@@ -212,6 +221,9 @@ export default function ExamRoomsMgmt() {
     if (t.includes('lớp 7') || t.includes('khối 7') || t.includes('toán 7') || t.includes('khối bảy') || /\b(khối\s+)?7\b/.test(t)) return 7
     if (t.includes('lớp 8') || t.includes('khối 8') || t.includes('toán 8') || t.includes('khối tám') || /\b(khối\s+)?8\b/.test(t)) return 8
     if (t.includes('lớp 9') || t.includes('khối 9') || t.includes('toán 9') || t.includes('khối chín') || /\b(khối\s+)?9\b/.test(t)) return 9
+    if (t.includes('lớp 10') || t.includes('khối 10') || t.includes('toán 10') || t.includes('khối mười') || /\b(khối\s+)?10\b/.test(t)) return 10
+    if (t.includes('lớp 11') || t.includes('khối 11') || t.includes('toán 11') || t.includes('khối mười một') || /\b(khối\s+)?11\b/.test(t)) return 11
+    if (t.includes('lớp 12') || t.includes('khối 12') || t.includes('toán 12') || t.includes('khối mười hai') || /\b(khối\s+)?12\b/.test(t)) return 12
     return null
   }
 
@@ -221,12 +233,18 @@ export default function ExamRoomsMgmt() {
     if (gradeStr.includes('7') || gradeStr === '7') return 7
     if (gradeStr.includes('8') || gradeStr === '8') return 8
     if (gradeStr.includes('9') || gradeStr === '9') return 9
+    if (gradeStr.includes('10') || gradeStr === '10') return 10
+    if (gradeStr.includes('11') || gradeStr === '11') return 11
+    if (gradeStr.includes('12') || gradeStr === '12') return 12
 
     const className = ((cls.class_name || cls.name || '') as string).toLowerCase()
     if (className.includes('lớp 6') || className.includes('khối 6') || className.includes('toán 6') || /\b6\b/.test(className)) return 6
     if (className.includes('lớp 7') || className.includes('khối 7') || className.includes('toán 7') || /\b7\b/.test(className)) return 7
     if (className.includes('lớp 8') || className.includes('khối 8') || className.includes('toán 8') || /\b8\b/.test(className)) return 8
     if (className.includes('lớp 9') || className.includes('khối 9') || className.includes('toán 9') || /\b9\b/.test(className)) return 9
+    if (className.includes('lớp 10') || className.includes('khối 10') || className.includes('toán 10') || /\b10\b/.test(className)) return 10
+    if (className.includes('lớp 11') || className.includes('khối 11') || className.includes('toán 11') || /\b11\b/.test(className)) return 11
+    if (className.includes('lớp 12') || className.includes('khối 12') || className.includes('toán 12') || /\b12\b/.test(className)) return 12
 
     return null
   }
@@ -332,7 +350,7 @@ export default function ExamRoomsMgmt() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* LEFT SIDEBAR: BUTTONS (25% area) */}
           <div className="w-full lg:w-1/4 flex flex-row lg:flex-col gap-2.5 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 shrink-0">
-            {[6, 7, 8, 9, ...(hasOtherRooms ? ['others'] : [])].map((col) => {
+            {[6, 7, 8, 9, 10, 11, 12, ...(hasOtherRooms ? ['others'] : [])].map((col) => {
               const isOther = col === 'others'
               const gradeRooms = rooms.filter(r => isOther ? (getRoomGrade(r) === null || !displayGrades.includes(getRoomGrade(r)!)) : getRoomGrade(r) === col)
               const title = isOther ? 'Khác' : `Khối ${col}`
@@ -561,6 +579,9 @@ export default function ExamRoomsMgmt() {
               <option value="7">Khối 7</option>
               <option value="8">Khối 8</option>
               <option value="9">Khối 9</option>
+              <option value="10">Khối 10</option>
+              <option value="11">Khối 11</option>
+              <option value="12">Khối 12</option>
             </select>
           </div>
 

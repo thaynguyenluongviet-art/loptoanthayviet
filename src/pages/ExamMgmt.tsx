@@ -490,21 +490,28 @@ export default function ExamMgmt() {
   }
 
   const getExamGrade = (title: string) => {
+    if (!title) return null
     const t = title.toLowerCase()
     if (t.includes('lớp 6') || t.includes('khối 6') || t.includes('toán 6') || t.includes('khối sáu') || /\b(khối\s+)?6\b/.test(t)) return 6
     if (t.includes('lớp 7') || t.includes('khối 7') || t.includes('toán 7') || t.includes('khối bảy') || /\b(khối\s+)?7\b/.test(t)) return 7
     if (t.includes('lớp 8') || t.includes('khối 8') || t.includes('toán 8') || t.includes('khối tám') || /\b(khối\s+)?8\b/.test(t)) return 8
     if (t.includes('lớp 9') || t.includes('khối 9') || t.includes('toán 9') || t.includes('khối chín') || /\b(khối\s+)?9\b/.test(t)) return 9
+    if (t.includes('lớp 10') || t.includes('khối 10') || t.includes('toán 10') || t.includes('khối mười') || /\b(khối\s+)?10\b/.test(t)) return 10
+    if (t.includes('lớp 11') || t.includes('khối 11') || t.includes('toán 11') || t.includes('khối mười một') || /\b(khối\s+)?11\b/.test(t)) return 11
+    if (t.includes('lớp 12') || t.includes('khối 12') || t.includes('toán 12') || t.includes('khối mười hai') || /\b(khối\s+)?12\b/.test(t)) return 12
     return null
   }
 
-  const grades = [6, 7, 8, 9]
+  const grades = [6, 7, 8, 9, 10, 11, 12]
 
-  const examsByGrade = {
+  const examsByGrade: Record<string | number, any[]> = {
     6: exams.filter(e => getExamGrade(e.title) === 6),
     7: exams.filter(e => getExamGrade(e.title) === 7),
     8: exams.filter(e => getExamGrade(e.title) === 8),
     9: exams.filter(e => getExamGrade(e.title) === 9),
+    10: exams.filter(e => getExamGrade(e.title) === 10),
+    11: exams.filter(e => getExamGrade(e.title) === 11),
+    12: exams.filter(e => getExamGrade(e.title) === 12),
     others: exams.filter(e => {
       const g = getExamGrade(e.title)
       return g === null
@@ -545,7 +552,7 @@ export default function ExamMgmt() {
         {grades.map(grade => {
           const list: any[] = (examsByGrade as any)[grade] || []
           // Màu sắc tương ứng từng khối lớp
-          const theme = {
+          const themeMap: Record<number, { border: string, text: string, badge: string }> = {
             6: { border: 'border-blue-500', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-800' },
             7: { border: 'border-emerald-500', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-800' },
             8: { border: 'border-orange-500', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-800' },
@@ -553,7 +560,8 @@ export default function ExamMgmt() {
             10: { border: 'border-pink-500', text: 'text-pink-700', badge: 'bg-pink-100 text-pink-800' },
             11: { border: 'border-indigo-500', text: 'text-indigo-700', badge: 'bg-indigo-100 text-indigo-800' },
             12: { border: 'border-rose-500', text: 'text-rose-700', badge: 'bg-rose-100 text-rose-800' },
-          }[grade as 6 | 7 | 8 | 9 | 10 | 11 | 12] || { border: 'border-gray-500', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800' }
+          }
+          const theme = themeMap[grade] || { border: 'border-gray-500', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800' }
 
           return (
             <div key={grade} className={`flex flex-col rounded-2xl border-t-4 ${theme.border} bg-white shadow-sm overflow-hidden min-h-[400px]`}>

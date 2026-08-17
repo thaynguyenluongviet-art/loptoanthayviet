@@ -543,14 +543,17 @@ export default function ExamMgmt() {
       {/* 4 Cột Khối Lớp */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {grades.map(grade => {
-          const list = examsByGrade[grade as 6 | 7 | 8 | 9]
+          const list: any[] = (examsByGrade as any)[grade] || []
           // Màu sắc tương ứng từng khối lớp
           const theme = {
             6: { border: 'border-blue-500', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-800' },
             7: { border: 'border-emerald-500', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-800' },
             8: { border: 'border-orange-500', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-800' },
             9: { border: 'border-purple-500', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-800' },
-          }[grade as 6 | 7 | 8 | 9]
+            10: { border: 'border-pink-500', text: 'text-pink-700', badge: 'bg-pink-100 text-pink-800' },
+            11: { border: 'border-indigo-500', text: 'text-indigo-700', badge: 'bg-indigo-100 text-indigo-800' },
+            12: { border: 'border-rose-500', text: 'text-rose-700', badge: 'bg-rose-100 text-rose-800' },
+          }[grade as 6 | 7 | 8 | 9 | 10 | 11 | 12] || { border: 'border-gray-500', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800' }
 
           return (
             <div key={grade} className={`flex flex-col rounded-2xl border-t-4 ${theme.border} bg-white shadow-sm overflow-hidden min-h-[400px]`}>

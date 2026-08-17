@@ -25,15 +25,18 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('exams', 'exams', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 4. Bật quyền cho Storage bucket
-CREATE POLICY IF NOT EXISTS "Public Access Avatars"
+-- 4. Bật quyền cho Storage bucket avatars
+DROP POLICY IF EXISTS "Public Access Avatars" ON storage.objects;
+CREATE POLICY "Public Access Avatars"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'avatars');
 
-CREATE POLICY IF NOT EXISTS "Upload Access Avatars"
+DROP POLICY IF EXISTS "Upload Access Avatars" ON storage.objects;
+CREATE POLICY "Upload Access Avatars"
 ON storage.objects FOR INSERT
 WITH CHECK (bucket_id = 'avatars');
 
-CREATE POLICY IF NOT EXISTS "Update Access Avatars"
+DROP POLICY IF EXISTS "Update Access Avatars" ON storage.objects;
+CREATE POLICY "Update Access Avatars"
 ON storage.objects FOR UPDATE
 USING (bucket_id = 'avatars');

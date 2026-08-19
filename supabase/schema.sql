@@ -137,18 +137,18 @@ alter table payments   enable row level security;
 alter table email_logs enable row level security;
 alter table teacher_classes enable row level security;
 
--- All authenticated users can read
+-- All authenticated users or students can read
 create policy "auth read profiles"   on profiles   for select using (auth.role() = 'authenticated');
-create policy "auth read students"   on students   for select using (auth.role() = 'authenticated');
-create policy "auth read classes"    on classes    for select using (auth.role() = 'authenticated');
-create policy "auth read enrollments" on enrollments for select using (auth.role() = 'authenticated');
+create policy "allow select students"   on students   for select using (true);
+create policy "allow select classes"    on classes    for select using (true);
+create policy "allow select enrollments" on enrollments for select using (true);
 create policy "auth read attendance" on attendance  for select using (auth.role() = 'authenticated');
 create policy "auth read payments"   on payments    for select using (auth.role() = 'authenticated');
 create policy "auth read email_logs" on email_logs  for select using (auth.role() = 'authenticated');
 create policy "auth read tc"         on teacher_classes for select using (auth.role() = 'authenticated');
 
--- All authenticated users can write (role-based access enforced in app layer)
-create policy "auth write students"  on students   for all using (auth.role() = 'authenticated');
+-- Write policies
+create policy "allow write students"  on students   for all using (true);
 create policy "auth write classes"   on classes    for all using (auth.role() = 'authenticated');
 create policy "auth write enrollments" on enrollments for all using (auth.role() = 'authenticated');
 create policy "auth write attendance" on attendance for all using (auth.role() = 'authenticated');

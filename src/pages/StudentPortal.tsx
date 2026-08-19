@@ -149,11 +149,14 @@ export default function StudentPortal() {
 
   // ── Xác minh học sinh (mã + mật khẩu bắt buộc) ─────────────
   const verifyStudent = async (code: string, password: string) => {
-    if (!code.trim()) {
+    const cleanCode = (code || '').replace(/[\u200B-\u200D\uFEFF\s]/g, '').trim()
+    const cleanPassword = (password || '').trim()
+
+    if (!cleanCode) {
       toast.error('Vui lòng nhập Mã học sinh!')
       return null
     }
-    if (!password.trim()) {
+    if (!cleanPassword) {
       toast.error('Vui lòng nhập Mật khẩu!')
       return null
     }
@@ -161,10 +164,16 @@ export default function StudentPortal() {
     const { data, error } = await supabase
       .from('students')
       .select('*')
-      .ilike('student_code', code.trim())
+      .ilike('student_code', cleanCode)
       .maybeSingle()
 
-    if (error || !data) {
+    if (error) {
+      console.error('Lỗi kết nối cơ sở dữ liệu học sinh:', error)
+      toast.error('Lỗi kết nối: ' + (error.message || 'Không thể truy cập dữ liệu học sinh'))
+      return null
+    }
+
+    if (!data) {
       toast.error('Sai Mã học sinh! Vui lòng kiểm tra lại.')
       return null
     }

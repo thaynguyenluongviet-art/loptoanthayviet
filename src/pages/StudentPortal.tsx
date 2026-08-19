@@ -576,64 +576,45 @@ export default function StudentPortal() {
   const pendingExams = examsList.filter(room => !submittedRoomIds.includes(room.id))
   const activePendingCount = pendingExams.filter(room => room.status !== 'closed' && room.status !== 'waiting').length
 
-  // --- PHÂN TÍCH TIẾN ĐỘ THEO BUỔI & BÀI ---
-  const parsedExams = examsList.map(room => {
-    const title = room.exams?.title || ''
-    const matchBuoi = title.match(/(?:buổi|buoi|b)\s*(\d+)/i)
-    const buoi = matchBuoi ? parseInt(matchBuoi[1]) : null
-
-    const matchDe = title.match(/(?:đề|de|bài|bai|đề\s*số|de\s*so)\s*(\d+)/i)
-    const bai = matchDe ? parseInt(matchDe[1]) : null
-
-    return { room, buoi, bai, title }
-  })
-
-  // Tìm buổi học lớn nhất
-  const buoiNumbers = parsedExams
-    .map(e => e.buoi)
-    .filter(b => typeof b === 'number' && b > 0)
-  const maxBuoi = buoiNumbers.length > 0 ? Math.max(...buoiNumbers) : 4
-
-  // Tạo cấu trúc cột: mỗi buổi có Đề 1 và Đề 2
-  const tableCols = []
-  for (let b = 1; b <= maxBuoi; b++) {
-    tableCols.push({ buoi: b, bai: 1 })
-    tableCols.push({ buoi: b, bai: 2 })
+  // --- TỔNG HỢP CHI TIẾT BÀI THI PHÒNG THI ---
+  const getAttempts = (sub: any) => {
+    if (!sub) return 0
+    return sub.score_breakdown?.attempt_count || 1
   }
 
-  // Khớp dữ liệu phòng thi & bài nộp cho từng cột
-  const gridData = tableCols.map(c => {
-    const matched = parsedExams.find(e => e.buoi === c.buoi && e.bai === c.bai)
-    let sub = null
-    if (matched) {
-      sub = submissionsList.find(s => s.room_id === matched.room.id)
+  const getViolations = (sub: any) => {
+    if (!sub) return 0
+    const historySwitches = (sub.score_breakdown?.history || []).reduce((sum: number, att: any) => sum + (att.tab_switches || 0), 0)
+    return (sub.tab_switches || 0) + historySwitches
+  }
+
+  const getScoreDisplay = (sub: any) => {
+    if (!sub) return '—'
+    if (sub.status !== 'submitted') return 'Đang làm'
+    return typeof sub.score === 'number' ? sub.score.toFixed(1) : 'Chưa chấm'
+  }
+
+  const formatDuration = (sub: any) => {
+    const dur = sub?.duration
+    if (!dur || typeof dur !== 'number' || dur <= 0) return '—'
+    const mins = Math.floor(dur / 60)
+    const secs = dur % 60
+    if (mins > 0 && secs > 0) return `${mins}p ${secs}s`
+    if (mins > 0) return `${mins} phút`
+    return `${secs}s`
+  }
+
+  const formatDateTime = (dateStr: string | null | undefined) => {
+    if (!dateStr) return null
+    try {
+      const d = new Date(dateStr)
+      return {
+        date: format(d, 'dd/MM/yyyy'),
+        time: format(d, 'HH:mm')
+      }
+    } catch {
+      return null
     }
-    return {
-      buoi: c.buoi,
-      bai: c.bai,
-      exam: matched ? matched.room : null,
-      sub
-    }
-  })
-
-  const getAttempts = (item: any) => {
-    if (!item.exam) return '-'
-    if (!item.sub) return '0'
-    return item.sub.score_breakdown?.attempt_count || 1
-  }
-
-  const getViolations = (item: any) => {
-    if (!item.exam) return '-'
-    if (!item.sub) return '0'
-    const historySwitches = (item.sub.score_breakdown?.history || []).reduce((sum: number, att: any) => sum + (att.tab_switches || 0), 0)
-    return (item.sub.tab_switches || 0) + historySwitches
-  }
-
-  const getScoreDisplay = (item: any) => {
-    if (!item.exam) return '-'
-    if (!item.sub) return 'Chưa thi'
-    if (item.sub.status !== 'submitted') return 'Đang làm'
-    return typeof item.sub.score === 'number' ? item.sub.score.toFixed(1) : 'Chưa chấm'
   }
 
 
@@ -848,7 +829,7 @@ export default function StudentPortal() {
               </div>
             </div>
           </div>
-          {/* TABLE MATRIX */}
+          {/* TABLE BẢNG TỔNG HỢP KẾT QUẢ CHI TIẾT */}
           <div>
             <h3 className="text-sm font-extrabold text-gray-700 mb-3 uppercase tracking-wider flex items-center gap-1.5">
               <span>📋 Bảng tổng hợp kết quả chi tiết</span>
@@ -856,91 +837,182 @@ export default function StudentPortal() {
             <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-teal-600 text-white text-center font-bold text-sm">
-                    <th className="p-3 border-r border-teal-750 bg-teal-700 text-center font-black rounded-tl-xl w-[120px]">Buổi học</th>
-                    <th className="p-3 border-r border-teal-700 text-center font-black w-[100px]">Mã đề</th>
-                    <th className="p-3 border-r border-teal-700 text-center font-black w-[120px]">Điểm số</th>
-                    <th className="p-3 text-center font-black rounded-tr-xl">Trạng thái</th>
+                  <tr className="bg-teal-600 text-white text-center font-bold text-xs uppercase tracking-wider">
+                    <th className="p-3 border-r border-teal-700 text-center font-black rounded-tl-xl w-[115px]">Ngày giao đề</th>
+                    <th className="p-3 border-r border-teal-700 text-center font-black w-[115px]">Ngày làm đề</th>
+                    <th className="p-3 border-r border-teal-700 text-left font-black min-w-[220px]">Tên đề tôi giao ở phòng thi</th>
+                    <th className="p-3 border-r border-teal-700 text-center font-black w-[90px]">Điểm số</th>
+                    <th className="p-3 border-r border-teal-700 text-center font-black w-[90px]">Số lần thi</th>
+                    <th className="p-3 border-r border-teal-700 text-center font-black w-[125px]">Tổng thời gian thi</th>
+                    <th className="p-3 border-r border-teal-700 text-center font-black w-[110px]">Số lần vi phạm</th>
+                    <th className="p-3 text-center font-black rounded-tr-xl w-[160px]">Trạng thái</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {Array.from({ length: maxBuoi }, (_, i) => maxBuoi - i).map(b => {
-                    const items = [
-                      gridData.find(d => d.buoi === b && d.bai === 2),
-                      gridData.find(d => d.buoi === b && d.bai === 1),
-                    ].filter(Boolean)
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {examsList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-gray-400 text-sm font-medium">
+                        Hiện tại chưa có đề thi nào được giao trong phòng thi.
+                      </td>
+                    </tr>
+                  ) : (
+                    examsList.map((room) => {
+                      const sub = submissionsList.find(s => s.room_id === room.id)
+                      const assignedDate = formatDateTime(room.created_at)
+                      const submittedDate = formatDateTime(sub?.submitted_at || (sub?.status === 'in_progress' ? sub?.created_at : null))
+                      const displayScore = getScoreDisplay(sub)
+                      const attempts = getAttempts(sub)
+                      const violations = getViolations(sub)
+                      const durationStr = formatDuration(sub)
 
-                    return items.map((item, idx) => {
-                      const displayScore = getScoreDisplay(item)
                       let scoreColor = 'text-gray-400'
-                      if (item.sub && item.sub.status === 'submitted' && typeof item.sub.score === 'number') {
-                        scoreColor = item.sub.score >= 8.0 
-                          ? 'text-emerald-600 font-extrabold bg-emerald-50/10' 
-                          : item.sub.score >= 5.0 
-                            ? 'text-teal-600 font-bold bg-teal-50/5' 
-                            : 'text-rose-600 font-extrabold bg-rose-50/10'
+                      if (sub && sub.status === 'submitted' && typeof sub.score === 'number') {
+                        scoreColor = sub.score >= 8.0 
+                          ? 'text-emerald-600 font-black' 
+                          : sub.score >= 5.0 
+                            ? 'text-teal-600 font-bold' 
+                            : 'text-rose-600 font-black'
                       } else if (displayScore === 'Đang làm') {
                         scoreColor = 'text-amber-600 font-bold animate-pulse'
                       }
 
-                      const isClosed = item.exam?.status === 'closed'
-                      const isWaiting = item.exam?.status === 'waiting'
+                      const isClosed = room.status === 'closed'
+                      const isWaiting = room.status === 'waiting'
 
                       return (
-                        <tr key={`${b}-${item.bai}`} className="hover:bg-slate-50 transition-colors border-b border-slate-200 text-center">
-                          {/* Buổi học cell */}
-                          {idx === 0 && (
-                            <td 
-                              rowSpan={items.length} 
-                              className="p-3 border-r border-slate-200 text-center font-extrabold text-gray-800 bg-teal-50/20 text-sm"
-                            >
-                              Buổi {b}
-                            </td>
-                          )}
-
-                          {/* Mã đề */}
-                          <td className="p-3 border-r border-slate-200 text-center font-bold text-gray-600 text-sm">
-                            Đề {item.bai}
+                        <tr key={room.id} className="hover:bg-teal-50/20 transition-colors text-center text-sm">
+                          {/* 1. Ngày giao đề */}
+                          <td className="p-3 border-r border-slate-100 text-center">
+                            {assignedDate ? (
+                              <div>
+                                <div className="font-bold text-gray-700 text-xs">{assignedDate.date}</div>
+                                <div className="text-[11px] text-gray-400 font-mono font-medium">{assignedDate.time}</div>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-xs font-medium">—</span>
+                            )}
                           </td>
 
-                          {/* Điểm số */}
-                          <td className={`p-3 border-r border-slate-200 text-center text-sm font-black ${scoreColor}`}>
-                            {displayScore}
+                          {/* 2. Ngày làm đề */}
+                          <td className="p-3 border-r border-slate-100 text-center">
+                            {submittedDate ? (
+                              <div>
+                                <div className={`text-xs font-bold ${sub?.status === 'in_progress' ? 'text-amber-600' : 'text-gray-700'}`}>
+                                  {submittedDate.date}
+                                </div>
+                                <div className="text-[11px] text-gray-400 font-mono font-medium">
+                                  {submittedDate.time} {sub?.status === 'in_progress' && '(Đang làm)'}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-xs font-medium">—</span>
+                            )}
                           </td>
 
-                          {/* Trạng thái / Hành động */}
-                          <td className="p-3 text-center text-sm">
-                            {!item.exam ? (
-                              <span className="text-gray-400">-</span>
-                            ) : isClosed ? (
-                              <span className="text-gray-400 font-semibold">Đã đóng</span>
+                          {/* 3. Tên đề tôi giao ở phòng thi */}
+                          <td className="p-3 border-r border-slate-100 text-left">
+                            <div className="font-bold text-gray-800 text-sm leading-snug line-clamp-2">
+                              {room.exams?.title || `Phòng thi ${room.code}`}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                                Phòng: {room.code}
+                              </span>
+                              {room.classes?.class_name && (
+                                <span className="text-[10px] font-semibold bg-teal-50 text-teal-700 px-1.5 py-0.5 rounded border border-teal-100">
+                                  {room.classes.class_name}
+                                </span>
+                              )}
+                              <span className="text-[10px] text-gray-400 flex items-center gap-0.5 font-medium">
+                                <Clock className="w-3 h-3 text-gray-400" /> {room.time_limit} phút
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* 4. Điểm số */}
+                          <td className="p-3 border-r border-slate-100 text-center">
+                            {sub && sub.status === 'submitted' && typeof sub.score === 'number' ? (
+                              <div className="inline-block px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200/80 shadow-2xs">
+                                <span className={`text-base font-black ${scoreColor}`}>
+                                  {sub.score.toFixed(1)}
+                                </span>
+                                <span className="text-[10px] text-gray-400 font-semibold ml-0.5">/10</span>
+                              </div>
+                            ) : displayScore === 'Đang làm' ? (
+                              <span className="text-amber-600 font-bold text-xs bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse inline-block">
+                                Đang làm
+                              </span>
+                            ) : (
+                              <span className="text-gray-300 font-bold text-sm">—</span>
+                            )}
+                          </td>
+
+                          {/* 5. Số lần thi */}
+                          <td className="p-3 border-r border-slate-100 text-center">
+                            {sub ? (
+                              <span className="font-bold text-gray-700 text-xs px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+                                {attempts}
+                              </span>
+                            ) : (
+                              <span className="text-gray-300 text-xs font-bold">0</span>
+                            )}
+                          </td>
+
+                          {/* 6. Tổng thời gian thi */}
+                          <td className="p-3 border-r border-slate-100 text-center">
+                            <span className="font-semibold text-gray-700 text-xs">
+                              {durationStr}
+                            </span>
+                          </td>
+
+                          {/* 7. Số lần vi phạm */}
+                          <td className="p-3 border-r border-slate-100 text-center">
+                            {violations > 0 ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 text-xs font-extrabold rounded-md">
+                                ⚠️ {violations}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-xs font-semibold">0</span>
+                            )}
+                          </td>
+
+                          {/* 8. Trạng thái */}
+                          <td className="p-3 text-center">
+                            {isClosed && (!sub || sub.status !== 'submitted') ? (
+                              <span className="text-gray-400 font-bold text-xs bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 inline-block">
+                                Đã đóng
+                              </span>
                             ) : isWaiting ? (
-                              <span className="text-amber-500 font-semibold">Chờ mở</span>
-                            ) : !item.sub ? (
+                              <span className="text-amber-600 font-bold text-xs bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 inline-block">
+                                Chờ mở
+                              </span>
+                            ) : !sub ? (
                               <button
-                                onClick={() => navigate(`/exam-room/${item.exam.id}`)}
-                                className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold rounded-lg shadow-sm transition-all"
+                                onClick={() => navigate(`/exam-room/${room.id}`)}
+                                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-black rounded-lg shadow-sm transition-all flex items-center gap-1 mx-auto"
                               >
                                 Vào thi ⚡
                               </button>
-                            ) : item.sub.status !== 'submitted' ? (
+                            ) : sub.status !== 'submitted' ? (
                               <button
-                                onClick={() => navigate(`/exam-room/${item.exam.id}`)}
-                                className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold rounded-lg shadow-sm transition-all animate-pulse"
+                                onClick={() => navigate(`/exam-room/${room.id}`)}
+                                className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-black rounded-lg shadow-sm transition-all animate-pulse flex items-center gap-1 mx-auto"
                               >
                                 Làm tiếp ⚡
                               </button>
                             ) : (
-                              <div className="flex gap-2 justify-center items-center">
+                              <div className="flex gap-1.5 justify-center items-center flex-wrap">
                                 <button
-                                  onClick={() => handleRetakeExam(item.exam, item.sub)}
-                                  className="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1"
+                                  onClick={() => handleRetakeExam(room, sub)}
+                                  className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-2xs"
+                                  title="Thi lại bài thi này"
                                 >
                                   <RefreshCw className="w-3 h-3" /> Thi lại
                                 </button>
                                 <button
-                                  onClick={() => navigate(`/exam-room/${item.exam.id}`)}
-                                  className="px-3 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 text-xs font-bold rounded-lg transition-all flex items-center gap-1"
+                                  onClick={() => navigate(`/exam-room/${room.id}`)}
+                                  className="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 text-xs font-bold rounded-lg transition-all flex items-center gap-1 shadow-2xs"
+                                  title="Xem lại bài thi và kết quả"
                                 >
                                   Kết quả 🔍
                                 </button>
@@ -950,7 +1022,7 @@ export default function StudentPortal() {
                         </tr>
                       )
                     })
-                  })}
+                  )}
                 </tbody>
               </table>
             </div>

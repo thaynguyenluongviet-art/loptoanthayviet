@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { ChevronLeft, BrainCircuit, Eye, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, BrainCircuit, Eye, AlertTriangle, FileSpreadsheet, Loader2 } from 'lucide-react'
+import { exportExamRoomToExcel } from '@/utils/exportExamRoomExcel'
 import Modal from '@/components/Modal'
 import EssayGraderPanel from '@/components/EssayGraderPanel'
 import SubmissionDetailView from '@/components/SubmissionDetailView'
@@ -17,6 +18,7 @@ export default function ExamResultsPage() {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [notSubmittedStudents, setNotSubmittedStudents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
 
   const [selectedSub, setSelectedSub] = useState<any>(null)
   const [showEssayGrader, setShowEssayGrader] = useState(false)
@@ -151,6 +153,21 @@ export default function ExamResultsPage() {
     }
   }
 
+  const handleExportExcel = async () => {
+    if (!room) return
+    setExporting(true)
+    const loadingToast = toast.loading(`Đang xuất file Excel phòng [${room.code}]...`)
+    try {
+      await exportExamRoomToExcel(room)
+      toast.success(`Xuất dữ liệu phòng [${room.code}] thành công!`, { id: loadingToast })
+    } catch (err: any) {
+      console.error('Lỗi xuất excel:', err)
+      toast.error(err?.message || 'Có lỗi xảy ra khi xuất file Excel', { id: loadingToast })
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const totalEnrolled = submissions.length + notSubmittedStudents.length
 
   if (loading) return <div className="p-20 text-center text-teal-600 font-bold">Đang tải bảng điểm...</div>
@@ -173,12 +190,28 @@ export default function ExamResultsPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowEssayGrader(true)}
-          className="btn-teal bg-violet-600 hover:bg-violet-700 flex items-center gap-2 w-max"
-        >
-          <BrainCircuit className="w-4 h-4" /> Chấm Tự luận AI
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportExcel}
+            disabled={exporting}
+            className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 font-bold rounded-xl flex items-center gap-2 transition-all shadow-sm disabled:opacity-50"
+            title="Xuất kết quả bài thi ra file Excel"
+          >
+            {exporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            )}
+            Xuất Excel
+          </button>
+
+          <button
+            onClick={() => setShowEssayGrader(true)}
+            className="btn-teal bg-violet-600 hover:bg-violet-700 flex items-center gap-2 w-max"
+          >
+            <BrainCircuit className="w-4 h-4" /> Chấm Tự luận AI
+          </button>
+        </div>
       </div>
 
       {/* Tab Selector */}

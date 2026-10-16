@@ -279,85 +279,49 @@ const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               )}
 
-            {/* Nhóm câu hỏi theo từng phần đề thi */}
-            {(() => {
-              const mc = exam.questions.filter((q: Question) => q.type === 'multiple_choice' || !q.type);
-              const tf = exam.questions.filter((q: Question) => q.type === 'true_false');
-              const sa = exam.questions.filter((q: Question) => q.type === 'short_answer');
-              const wr = exam.questions.filter((q: Question) => q.type === 'writing');
+              {exam.questions.map((q: Question) => {
+                // ✅ FIX: robust answer lookup với cả number và string key
+                const userAnswer = getAnswer(answers, q.number);
+                const correctAnswer = q.correctAnswer || '';
 
-              const sections = [
-                { part: 1, title: 'PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN', desc: 'Mỗi câu chọn 1 đáp án đúng (A, B, C, D)', bg: 'bg-gradient-to-r from-blue-600 to-indigo-700', questions: mc },
-                { part: 2, title: 'PHẦN II. TRẮC NGHIỆM ĐÚNG/SAI', desc: 'Chọn Đúng hoặc Sai cho mỗi mệnh đề', bg: 'bg-gradient-to-r from-teal-600 to-emerald-700', questions: tf },
-                { part: 3, title: 'PHẦN III. TRẢ LỜI NGẮN', desc: 'Điền đáp án số vào ô trống', bg: 'bg-gradient-to-r from-amber-500 to-orange-600', questions: sa },
-                { part: 4, title: 'PHẦN IV. TỰ LUẬN', desc: 'Tự luận chi tiết', bg: 'bg-gradient-to-r from-purple-600 to-fuchsia-700', questions: wr },
-              ].filter(s => s.questions.length > 0);
-
-              return (
-                <div className="divide-y-4 divide-gray-100">
-                  {sections.map(section => (
-                    <div key={section.part} className="space-y-0">
-                      <div className={`px-5 py-3.5 ${section.bg} text-white flex items-center justify-between shadow-sm`}>
-                        <div>
-                          <h4 className="font-black text-sm tracking-wide">{section.title}</h4>
-                          <p className="text-white/80 text-xs font-medium">{section.desc}</p>
-                        </div>
-                        <span className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full text-white">
-                          {section.questions.length} câu
-                        </span>
-                      </div>
-                      <div className="divide-y divide-gray-100">
-                        {section.questions.map((q: Question, idx: number) => {
-                          const displayNum = idx + 1;
-                          const userAnswer = getAnswer(answers, q.number);
-                          const correctAnswer = q.correctAnswer || '';
-
-                          if (q.type === 'true_false') {
-                            const detail = getTFDetail(scoreBreakdown, q.number);
-                            return (
-                              <TrueFalseReview
-                                key={q.number}
-                                question={q}
-                                displayNum={displayNum}
-                                userAnswer={userAnswer}
-                                correctAnswer={correctAnswer}
-                                showCorrectAnswers={canShowCorrectAnswers}
-                                showExplanations={canShowExplanations}
-                                breakdown={detail}
-                              />
-                            );
-                          } else if (q.type === 'short_answer') {
-                            return (
-                              <ShortAnswerReview
-                                key={q.number}
-                                question={q}
-                                displayNum={displayNum}
-                                userAnswer={userAnswer}
-                                correctAnswer={correctAnswer}
-                                showCorrectAnswers={canShowCorrectAnswers}
-                                showExplanations={canShowExplanations}
-                              />
-                            );
-                          } else {
-                            return (
-                              <MultipleChoiceReview
-                                key={q.number}
-                                question={q}
-                                displayNum={displayNum}
-                                userAnswer={userAnswer}
-                                correctAnswer={correctAnswer}
-                                showCorrectAnswers={canShowCorrectAnswers}
-                                showExplanations={canShowExplanations}
-                              />
-                            );
-                          }
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })()}
+                if (q.type === 'true_false') {
+                  // ✅ FIX: truyền đúng breakdown với string key fallback
+                  const detail = getTFDetail(scoreBreakdown, q.number);
+                  return (
+                    <TrueFalseReview
+                      key={q.number}
+                      question={q}
+                      userAnswer={userAnswer}
+                      correctAnswer={correctAnswer}
+                      showCorrectAnswers={canShowCorrectAnswers}
+                      showExplanations={canShowExplanations}
+                      breakdown={detail}
+                    />
+                  );
+                } else if (q.type === 'short_answer') {
+                  return (
+                    <ShortAnswerReview
+                      key={q.number}
+                      question={q}
+                      userAnswer={userAnswer}
+                      correctAnswer={correctAnswer}
+                      showCorrectAnswers={canShowCorrectAnswers}
+                      showExplanations={canShowExplanations}
+                    />
+                  );
+                } else {
+                  return (
+                    <MultipleChoiceReview
+                      key={q.number}
+                      question={q}
+                      userAnswer={userAnswer}
+                      correctAnswer={correctAnswer}
+                      showCorrectAnswers={canShowCorrectAnswers}
+                      showExplanations={canShowExplanations}
+                    />
+                  );
+                }
+              })}
             </div>
           </div>
         )}
@@ -369,12 +333,11 @@ const ResultView: React.FC<ResultViewProps> = ({
 // ===== Review: Multiple choice =====
 const MultipleChoiceReview: React.FC<{
   question: Question;
-  displayNum?: number;
   userAnswer?: string;
   correctAnswer: string;
   showCorrectAnswers: boolean;
   showExplanations: boolean;
-}> = ({ question, displayNum, userAnswer, correctAnswer, showCorrectAnswers, showExplanations }) => {
+}> = ({ question, userAnswer, correctAnswer, showCorrectAnswers, showExplanations }) => {
   const isCorrect = !!userAnswer && userAnswer.toUpperCase() === correctAnswer?.toUpperCase();
   const isUnanswered = !userAnswer;
   const displayOptions = question.options || [];
@@ -388,10 +351,10 @@ const MultipleChoiceReview: React.FC<{
   return (
     <div className={`p-5 ${statusColor}`}>
       <div className="flex items-start gap-3">
-        <div className={`px-3 py-1 rounded-lg font-black text-xs text-white flex-shrink-0 shadow-xs ${
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white flex-shrink-0 ${
           isUnanswered ? 'bg-slate-400' : isCorrect ? 'bg-emerald-500' : 'bg-red-500'
         }`}>
-          Câu {displayNum ?? (question.number % 100)}
+          {question.number % 100}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-gray-800 mb-3 text-[15px] leading-relaxed">
@@ -469,13 +432,12 @@ const MultipleChoiceReview: React.FC<{
 // ===== Review: True/False =====
 const TrueFalseReview: React.FC<{
   question: Question;
-  displayNum?: number;
   userAnswer?: string;
   correctAnswer: string;
   showCorrectAnswers: boolean;
   showExplanations: boolean;
   breakdown?: { correctCount: number; points: number; answeredCount?: number; totalStatements?: number };
-}> = ({ question, displayNum, userAnswer, correctAnswer, showCorrectAnswers, showExplanations, breakdown }) => {
+}> = ({ question, userAnswer, correctAnswer, showCorrectAnswers, showExplanations, breakdown }) => {
 
   // ✅ FIX: Parse đáp án học sinh – hỗ trợ JSON {"a":true,"b":false} VÀ format cũ "a:T,b:F"
   let userAnswers: Record<string, string> = {};
@@ -533,10 +495,10 @@ const TrueFalseReview: React.FC<{
   return (
     <div className={`p-5 ${statusBg}`}>
       <div className="flex items-start gap-3">
-        <div className={`px-3 py-1 rounded-lg font-black text-xs text-white flex-shrink-0 shadow-xs ${
-          allCorrect ? 'bg-emerald-500' : partialCorrect ? 'bg-amber-500' : 'bg-red-500'
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white flex-shrink-0 ${
+          allCorrect ? 'bg-emerald-500' : partialCorrect ? 'bg-yellow-500' : 'bg-red-500'
         }`}>
-          Câu {displayNum ?? (question.number % 100)}
+          {question.number % 100}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-gray-800 mb-2 text-[15px] leading-relaxed">
@@ -646,12 +608,11 @@ const TrueFalseReview: React.FC<{
 // ===== Review: Short answer =====
 const ShortAnswerReview: React.FC<{
   question: Question;
-  displayNum?: number;
   userAnswer?: string;
   correctAnswer: string;
   showCorrectAnswers: boolean;
   showExplanations: boolean;
-}> = ({ question, displayNum, userAnswer, correctAnswer, showCorrectAnswers, showExplanations }) => {
+}> = ({ question, userAnswer, correctAnswer, showCorrectAnswers, showExplanations }) => {
   const normalizeAnswer = (answer: string): string => {
     let norm = (answer || '').toLowerCase().replace(/\s+/g, '').replace(/,/g, '.').trim();
     const numValue = Number(norm);
@@ -673,10 +634,10 @@ const ShortAnswerReview: React.FC<{
   return (
     <div className={`p-5 ${statusBg}`}>
       <div className="flex items-start gap-3">
-        <div className={`px-3 py-1 rounded-lg font-black text-xs text-white flex-shrink-0 shadow-xs ${
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm text-white flex-shrink-0 ${
           isUnanswered ? 'bg-slate-400' : isCorrect ? 'bg-emerald-500' : 'bg-red-500'
         }`}>
-          Câu {displayNum ?? (question.number % 100)}
+          {question.number % 100}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-gray-800 mb-2 text-[15px] leading-relaxed">

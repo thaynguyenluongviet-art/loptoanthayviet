@@ -60,55 +60,26 @@ function writingRange(n: number) { return Array.from({ length: n }, (_, i) => 40
 
 function buildDefaultPointsConfig(mc: number, tf: number, sa: number, writing: number): ExamPointsConfig {
   const sections: SectionPointsConfig[] = [];
+  if (mc > 0) sections.push({ sectionId: 'part1', sectionName: 'PHẦN I. TRẮC NGHIỆM', questionType: 'multiple_choice', totalQuestions: mc, totalPoints: 3, pointsPerQuestion: parseFloat((3 / mc).toFixed(4)) });
+  if (tf > 0) sections.push({ sectionId: 'part2', sectionName: 'PHẦN II. ĐÚNG SAI', questionType: 'true_false', totalQuestions: tf, totalPoints: 4, pointsPerQuestion: parseFloat((4 / tf).toFixed(4)), trueFalseMode: 'stepped' });
+  if (sa > 0) sections.push({ sectionId: 'part3', sectionName: 'PHẦN III. TRẢ LỜI NGẮN', questionType: 'short_answer', totalQuestions: sa, totalPoints: 2, pointsPerQuestion: parseFloat((2 / sa).toFixed(4)) });
+  if (writing > 0) sections.push({ sectionId: 'part4', sectionName: 'PHẦN IV. TỰ LUẬN', questionType: 'writing' as any, totalQuestions: writing, totalPoints: 1, pointsPerQuestion: parseFloat((1 / writing).toFixed(4)) });
   
-  if (writing > 0) {
-    if (mc > 0) sections.push({ sectionId: 'part1', sectionName: 'PHẦN I. TRẮC NGHIỆM', questionType: 'multiple_choice', totalQuestions: mc, totalPoints: 3, pointsPerQuestion: parseFloat((3 / mc).toFixed(4)) });
-    if (tf > 0) sections.push({ sectionId: 'part2', sectionName: 'PHẦN II. ĐÚNG SAI', questionType: 'true_false', totalQuestions: tf, totalPoints: 4, pointsPerQuestion: parseFloat((4 / tf).toFixed(4)), trueFalseMode: 'stepped' });
-    if (sa > 0) sections.push({ sectionId: 'part3', sectionName: 'PHẦN III. TRẢ LỜI NGẮN', questionType: 'short_answer', totalQuestions: sa, totalPoints: 2, pointsPerQuestion: parseFloat((2 / sa).toFixed(4)) });
-    sections.push({ sectionId: 'part4', sectionName: 'PHẦN IV. TỰ LUẬN', questionType: 'writing' as any, totalQuestions: writing, totalPoints: 1, pointsPerQuestion: parseFloat((1 / writing).toFixed(4)) });
-  } else if (mc > 0 && tf > 0 && sa > 0) {
-    // Câu hình Câuẩn Bộ GD&ĐT 2025: 3.0 TN + 4.0 Đ/S + 3.0 TLN = 10.0 điểm
-    sections.push({ sectionId: 'part1', sectionName: 'PHẦN I. TRẮC NGHIỆM', questionType: 'multiple_choice', totalQuestions: mc, totalPoints: 3, pointsPerQuestion: parseFloat((3 / mc).toFixed(4)) });
-    sections.push({ sectionId: 'part2', sectionName: 'PHẦN II. ĐÚNG SAI', questionType: 'true_false', totalQuestions: tf, totalPoints: 4, pointsPerQuestion: parseFloat((4 / tf).toFixed(4)), trueFalseMode: 'stepped' });
-    sections.push({ sectionId: 'part3', sectionName: 'PHẦN III. TRẢ LỜI NGẮN', questionType: 'short_answer', totalQuestions: sa, totalPoints: 3, pointsPerQuestion: parseFloat((3 / sa).toFixed(4)) });
-  } else {
-    // PHẦN bổ linh hoạt các PHẦN để luôn đạt đúng 10 điểm
-    const list: { id: string; name: string; type: any; Câunt: number; weight: number }[] = [];
-    if (mc > 0) list.push({ id: 'part1', name: 'PHẦN I. TRẮC NGHIỆM', type: 'multiple_choice', Câunt: mc, weight: 3 });
-    if (tf > 0) list.push({ id: 'part2', name: 'PHẦN II. ĐÚNG SAI', type: 'true_false', Câunt: tf, weight: 4 });
-    if (sa > 0) list.push({ id: 'part3', name: 'PHẦN III. TRẢ LỜI NGẮN', type: 'short_answer', Câunt: sa, weight: 3 });
-    const totalWeight = list.reduce((acc, item) => acc + item.weight, 0) || 1;
-    let distributed = 0;
-    list.forEach((item, index) => {
-      const isLast = index === list.length - 1;
-      const pts = isLast ? Math.round((10 - distributed) * 100) / 100 : Math.round((10 * item.weight / totalWeight) * 10) / 10;
-      distributed += pts;
-      sections.push({
-        sectionId: item.id,
-        sectionName: item.name,
-        questionType: item.type,
-        totalQuestions: item.Câunt,
-        totalPoints: pts,
-        pointsPerQuestion: parseFloat((pts / item.Câunt).toFixed(4)),
-        ...(item.type === 'true_false' ? { trueFalseMode: 'stepped' } : {})
-      });
-    });
-  }
-  
-  return { maxScore: 10, sections, autoBalance: false };
+  const totalPts = sections.reduce((acc, s) => acc + s.totalPoints, 0);
+  return { maxScore: totalPts > 0 ? totalPts : 10, sections, autoBalance: false };
 }
 
 function buildExamData(config: PDFExamConfig, mcAns: MCAnswers, tfAns: TFAnswers, saAns: SAAnswers, writingAns: WritingAnswers) {
   const questions: Question[] = [];
   const answers: { [k: number]: string } = {};
 
-  mcRange(config.mcCâunt).forEach(n => {
+  mcRange(config.mcCount).forEach(n => {
     const ans = mcAns[n] || '';
     questions.push({ number: n, text: `Câu ${n}`, type: 'multiple_choice', options: ['A', 'B', 'C', 'D'].map(l => ({ letter: l, text: l })), correctAnswer: ans || null, part: 'PHẦN I' });
     if (ans) answers[n] = ans;
   });
   
-  tfRange(config.tfCâunt).forEach((n, idx) => {
+  tfRange(config.tfCount).forEach((n, idx) => {
     const cells = tfAns[n] || ['', '', '', ''];
     const tfMap: Record<string, boolean> = {};
     ['a', 'b', 'c', 'd'].forEach((lbl, i) => { tfMap[lbl] = cells[i] === 'Đ'; });
@@ -117,23 +88,22 @@ function buildExamData(config: PDFExamConfig, mcAns: MCAnswers, tfAns: TFAnswers
     if (hasAnswer) answers[n] = JSON.stringify(tfMap);
   });
   
-  saRange(config.saCâunt).forEach((n, idx) => {
+  saRange(config.saCount).forEach((n, idx) => {
     const ans = saAns[n] || '';
     questions.push({ number: n, text: `Câu ${idx + 1}`, type: 'short_answer', options: [], correctAnswer: ans || null, part: 'PHẦN III' });
     if (ans) answers[n] = ans;
   });
   
-  writingRange(config.writingCâunt).forEach((n, idx) => {
+  writingRange(config.writingCount).forEach((n, idx) => {
     const ans = writingAns[n] || '';
-    questions.push({ number: n, text: `Câu TỰ LUẬN ${idx + 1}`, type: 'writing' as any, options: [], correctAnswer: null, solution: ans || undefined, part: 'PHẦN IV' });
+    questions.push({ number: n, text: `Câu tự luận ${idx + 1}`, type: 'writing' as any, options: [], correctAnswer: null, solution: ans || undefined, part: 'PHẦN IV' });
   });
 
   const sections: ExamSection[] = [];
-  const saPointsStr = config.writingCâunt > 0 ? '2' : '3';
-  if (config.mcCâunt > 0) sections.push({ name: 'PHẦN I. TRẮC NGHIỆM', description: `Thí sinh trả lời từ Câu 1 đến Câu ${config.mcCâunt}.`, points: '3', questions: questions.filter(q => q.part === 'PHẦN I'), sectionType: 'multiple_choice' });
-  if (config.tfCâunt > 0) sections.push({ name: 'PHẦN II. ĐÚNG SAI', description: `Thí sinh trả lời từ Câu 1 đến Câu ${config.tfCâunt}.`, points: '4', questions: questions.filter(q => q.part === 'PHẦN II'), sectionType: 'true_false' });
-  if (config.saCâunt > 0) sections.push({ name: 'PHẦN III. TRẢ LỜI NGẮN', description: `Thí sinh trả lời từ Câu 1 đến Câu ${config.saCâunt}.`, points: saPointsStr, questions: questions.filter(q => q.part === 'PHẦN III'), sectionType: 'short_answer' });
-  if (config.writingCâunt > 0) sections.push({ name: 'PHẦN IV. TỰ LUẬN', description: `Thí sinh làm bài TỰ LUẬN từ Câu 1 đến Câu ${config.writingCâunt}.`, points: '1', questions: questions.filter(q => q.part === 'PHẦN IV'), sectionType: 'writing' as any });
+  if (config.mcCount > 0) sections.push({ name: 'PHẦN I. TRẮC NGHIỆM', description: `Thí sinh trả lời từ câu 1 đến câu ${config.mcCount}.`, points: '3', questions: questions.filter(q => q.part === 'PHẦN I'), sectionType: 'multiple_choice' });
+  if (config.tfCount > 0) sections.push({ name: 'PHẦN II. ĐÚNG SAI', description: `Thí sinh trả lời từ câu 1 đến câu ${config.tfCount}.`, points: '4', questions: questions.filter(q => q.part === 'PHẦN II'), sectionType: 'true_false' });
+  if (config.saCount > 0) sections.push({ name: 'PHẦN III. TRẢ LỜI NGẮN', description: `Thí sinh trả lời từ câu 1 đến câu ${config.saCount}.`, points: '2', questions: questions.filter(q => q.part === 'PHẦN III'), sectionType: 'short_answer' });
+  if (config.writingCount > 0) sections.push({ name: 'PHẦN IV. TỰ LUẬN', description: `Thí sinh làm bài tự luận từ câu 1 đến câu ${config.writingCount}.`, points: '1', questions: questions.filter(q => q.part === 'PHẦN IV'), sectionType: 'writing' as any });
   
   return { questions, sections, answers };
 }

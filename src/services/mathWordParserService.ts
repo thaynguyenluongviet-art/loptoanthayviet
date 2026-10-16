@@ -350,7 +350,7 @@ function parseAllQuestions(paragraphs: ParagraphData[], images: ImageData[]): Ex
     }
 
     examData.sections.push({
-      name: 'PHẦN I. Trắc nghiệm nhiều lựa chọn',
+      name: 'PHẦN 1. Trắc nghiệm nhiều lựa chọn',
       description: 'Thí sinh chọn một phương án đúng A, B, C hoặc D',
       points: '',
       questions: section1Questions,
@@ -368,7 +368,7 @@ function parseAllQuestions(paragraphs: ParagraphData[], images: ImageData[]): Ex
     }
 
     examData.sections.push({
-      name: 'PHẦN II. Trắc nghiệm đúng sai',
+      name: 'PHẦN 2. Trắc nghiệm đúng sai',
       description: 'Thí sinh chọn Đúng hoặc Sai cho mỗi ý a), b), c), d)',
       points: '',
       questions: section2Questions,
@@ -391,7 +391,7 @@ function parseAllQuestions(paragraphs: ParagraphData[], images: ImageData[]): Ex
       }
 
       examData.sections.push({
-        name: 'PHẦN III. Trắc nghiệm trả lời ngắn',
+        name: 'PHẦN 3. Trắc nghiệm trả lời ngắn',
         description: 'Thí sinh điền đáp án số vào ô trống',
         points: '',
         questions: section3Questions,
@@ -409,7 +409,7 @@ function parseAllQuestions(paragraphs: ParagraphData[], images: ImageData[]): Ex
       }
 
       examData.sections.push({
-        name: 'PHẦN IV. Tự luận',
+        name: 'PHẦN 4. Tự luận',
         description: 'Thí sinh trình bày lời giải chi tiết, có thể đính kèm hình ảnh bài làm',
         points: '',
         questions: section4Questions,
@@ -999,7 +999,7 @@ function convertToQuestion(pq: ParsedQuestion, globalIndex: number): Question {
 
   return {
     number: uniqueNumber,
-    text: escapeHtmlPreserveLaTeX(pq.text.replace(/^C(?:\u00e2u|au)\s*\d+[\s.:]*/i, '').trim()),
+    text: escapeHtmlPreserveLaTeX(pq.text),
     type: pq.type,
     options: pq.options.map((opt) => ({
       ...opt,

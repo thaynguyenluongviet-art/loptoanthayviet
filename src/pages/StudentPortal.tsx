@@ -22,7 +22,8 @@ import {
   Loader2,
   Video,
   Phone,
-  MessageCircle
+  MessageCircle,
+  Film
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
@@ -765,6 +766,13 @@ export default function StudentPortal() {
               <MessageCircle className="w-4 h-4" />
               <span>Zalo Thầy</span>
             </a>
+            <button
+              onClick={() => navigate('/live')}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-md"
+            >
+              <Film className="w-4 h-4 text-indigo-200" />
+              <span>Xem lại Video bài giảng</span>
+            </button>
             <button
               onClick={() => navigate('/live')}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs md:text-sm shadow-lg shadow-emerald-950/40 transition transform hover:scale-105 active:scale-95"

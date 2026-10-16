@@ -19,6 +19,7 @@ import ExamMgmt from '@/pages/ExamMgmt'
 import ExamRoomsMgmt from '@/pages/ExamRoomsMgmt'
 import ExamResultsPage from '@/pages/ExamResultsPage'
 import StudentPortal from '@/pages/StudentPortal'
+import LiveClassroomPage from '@/pages/LiveClassroomPage'
 import ExamRoomPage from '@/pages/ExamRoomPage'
 import CreatePdfExamPage from '@/pages/CreatePdfExamPage'
 import CreateTexExamPage from '@/pages/CreateTexExamPage'
@@ -86,6 +87,8 @@ export default function App() {
       <Route path="/login"    element={<Login />} />
       <Route path="/thi"      element={<StudentPortal />} />
       <Route path="/progress" element={<StudentProgressPage />} />
+      <Route path="/live"     element={<LiveClassroomPage />} />
+      <Route path="/live/:roomId" element={<LiveClassroomPage />} />
 
       {/* 2. PHÒNG THI & XEM KHÓA HỌC (Giao diện tập trung) */}
       <Route path="/exam-room/:roomId"                    element={<ExamRoomPage />} />
@@ -101,6 +104,7 @@ export default function App() {
         <Route path="attendance" element={<Attendance />} />
 
         {/* --- Nhóm Học liệu & Thi cử --- */}
+        <Route path="live"                 element={<LiveClassroomPage isTeacherView={true} />} />
         <Route path="courses"              element={<CourseMgmt />} />
         <Route path="exams"                element={<ExamMgmt />} />
         <Route path="create-pdf-exam"      element={<CreatePdfExamPage />} />

@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, BookOpen, CalendarCheck, Banknote,
   Mail, Settings, LogOut, FileText, MonitorPlay, ScanText,
   GraduationCap, Sigma, FilePlus, PlaySquare, Zap, FileType, CreditCard,
-  ClipboardList, Tag, MessageCircle,                                  // ← MỚI ZALO
+  ClipboardList, Tag, MessageCircle, Video,                                  // ← MỚI ZALO
 } from 'lucide-react'
 
 export default function Layout() {
@@ -34,6 +34,7 @@ export default function Layout() {
     {
       title: 'Học liệu & Thi cử',
       items: [
+        { path: '/live',              icon: Video,         label: 'Dạy Online (Live)', badge: 'LIVE' },
         { path: '/courses',           icon: PlaySquare,    label: 'Khóa học & Bài giảng' },
         { path: '/exams',             icon: FileText,      label: 'Ngân hàng đề' },
         { path: '/create-pdf-exam',   icon: FilePlus,      label: 'Tạo đề PDF' },
@@ -104,7 +105,8 @@ export default function Layout() {
                         }`}
                       >
                         <Icon className={`w-5 h-5 ${isActive ? 'text-teal-600' : 'opacity-80'}`} />
-                        <span className="text-sm">{item.label}</span>
+                        <span className="text-sm flex-1">{item.label}</span>
+                          {item.badge && (<span className="px-1.5 py-0.5 text-[9px] font-black rounded-full bg-rose-500 text-white animate-pulse shadow-sm">{item.badge}</span>)}
                       </Link>
                     )
                   })}

@@ -19,7 +19,10 @@ import {
   Upload,
   Trash2,
   X,
-  Loader2
+  Loader2,
+  Video,
+  Phone,
+  MessageCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
@@ -544,6 +547,31 @@ export default function StudentPortal() {
                   <span>VÀO HỆ THỐNG</span>
                 )}
               </button>
+
+                <div className="pt-2 border-t border-gray-100 flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/live')}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-500 hover:to-indigo-500 text-white font-bold text-sm shadow-md transition transform active:scale-95"
+                  >
+                    <Video className="w-4 h-4 text-emerald-300 animate-pulse" />
+                    <span>VÀO PHÒNG HỌC ONLINE NGAY</span>
+                  </button>
+
+                  <div className="flex items-center justify-between text-xs text-gray-500 px-1 pt-1">
+                    <a href="tel:0943688943" className="flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-800">
+                      <Phone className="w-3.5 h-3.5" /> Hotline: 0943.688.943
+                    </a>
+                    <a
+                      href="https://zalo.me/0943688943"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 font-bold hover:underline flex items-center gap-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> Zalo Thầy Việt
+                    </a>
+                  </div>
+                </div>
             </form>
           </div>
           <p className="text-center text-white/60 text-xs mt-4">
@@ -697,6 +725,55 @@ export default function StudentPortal() {
       </header>
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8 space-y-8 animate-fade-in">
+        {/* BANNER PHONG HOC TRUC TUYEN THAY VIET */}
+        <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-indigo-950 text-white rounded-3xl p-6 shadow-xl border border-teal-700/40 flex flex-col md:flex-row items-center justify-between gap-5 transition-all hover:shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center shrink-0 shadow-inner">
+              <Video className="w-8 h-8 text-emerald-400 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-black bg-rose-500 text-white shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                  LỚP HỌC TRỰC TUYẾN
+                </span>
+                <span className="text-xs text-teal-300 font-medium hidden sm:inline">• Bảng viết Scrble Ink Full HD</span>
+              </div>
+              <h2 className="text-lg md:text-xl font-extrabold text-white mt-1">Lớp Học Trực Tuyến – Thầy Nguyễn Lương Việt</h2>
+              <p className="text-xs text-teal-100/80 mt-0.5 leading-relaxed">
+                Học sinh bấm nút để tham gia lớp học ngay trên web. Có thể giơ tay, bật mic hỏi bài và xem nét chữ viết bảng của Thầy.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2 w-full md:w-auto justify-end">
+            <a
+              href="tel:0943688943"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition"
+              title="Hotline Thầy Việt"
+            >
+              <Phone className="w-4 h-4 text-emerald-300" />
+              <span>0943.688.943</span>
+            </a>
+            <a
+              href="https://zalo.me/0943688943"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-md"
+              title="Nhắn Zalo Thầy Việt"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Zalo Thầy</span>
+            </a>
+            <button
+              onClick={() => navigate('/live')}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs md:text-sm shadow-lg shadow-emerald-950/40 transition transform hover:scale-105 active:scale-95"
+            >
+              <Video className="w-4 h-4 text-slate-950" />
+              <span>VÀO HỌC NGAY</span>
+            </button>
+          </div>
+        </div>
         {/* Thông báo học phí */}
         {tuitionNotifications.length > 0 && tuitionNotifications.map((notif) => {
           let addInfo = `HP ${student.student_code}`

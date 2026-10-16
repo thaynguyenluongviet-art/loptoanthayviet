@@ -83,10 +83,10 @@ export const parseTexToExam = async (
     });
   };
 
-  addSection(part1Questions, 'PHẦN 1. Trắc nghiệm nhiều lựa chọn', 'Chọn một phương án đúng A, B, C hoặc D', 'multiple_choice');
-  addSection(part2Questions, 'PHẦN 2. Trắc nghiệm đúng sai', 'Chọn Đúng hoặc Sai cho mỗi mệnh đề', 'true_false');
-  addSection(part3Questions, 'PHẦN 3. Trả lời ngắn', 'Điền đáp án số vào ô trống', 'short_answer');
-  addSection(part4Questions, 'PHẦN 4. Tự luận', 'Học sinh trình bày lời giải chi tiết', 'writing');
+  addSection(part1Questions, 'PHẦN I. Trắc nghiệm nhiều lựa chọn', 'Chọn một phương án đúng A, B, C hoặc D', 'multiple_choice');
+  addSection(part2Questions, 'PHẦN II. Trắc nghiệm đúng sai', 'Chọn Đúng hoặc Sai cho mỗi mệnh đề', 'true_false');
+  addSection(part3Questions, 'PHẦN III. Trả lời ngắn', 'Điền đáp án số vào ô trống', 'short_answer');
+  addSection(part4Questions, 'PHẦN IV. Tự luận', 'Học sinh trình bày lời giải chi tiết', 'writing');
 
   return examData;
 };
@@ -738,7 +738,7 @@ function convertToQuestion(pq: ParsedQuestion): Question {
   const uniqueNumber = pq.part * 100 + pq.number;
   return {
     number: uniqueNumber,
-    text: pq.text,
+    text: (pq.text || '').replace(/^C(?:\u00e2u|au)\s*\d+[\s.:]*/i, '').trim(),
     type: pq.type,
     options: pq.options,
     correctAnswer: pq.correctAnswer,

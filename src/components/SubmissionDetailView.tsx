@@ -223,28 +223,28 @@ const SubmissionDetailView: React.FC<SubmissionDetailViewProps> = ({
 
   const partConfigs: Record<number, { title: string; desc: string; gradient: string; border: string; badge: string }> = {
     1: {
-      title: 'PHẦN 1. TRẮC NGHIỆM NHIỀU LỰA CHỌN',
-      desc: 'Chọn một phương án đúng A, B, C hoặc D',
+      title: 'PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN',
+      desc: 'Mỗi câu chọn 1 đáp án đúng (A, B, C, D)',
       gradient: 'from-blue-600 to-indigo-700',
       border: 'border-blue-200',
       badge: 'bg-blue-100 text-blue-700'
     },
     2: {
-      title: 'PHẦN 2. TRẮC NGHIỆM ĐÚNG SAI',
-      desc: 'Chọn Đúng hoặc Sai cho mỗi mệnh đề',
+      title: 'PHẦN II. TRẮC NGHIỆM ĐÚNG/SAI',
+      desc: 'Chọn Đúng hoặc Sai cho mỗi mệnh đề a, b, c, d',
       gradient: 'from-teal-600 to-emerald-700',
       border: 'border-teal-200',
       badge: 'bg-teal-100 text-teal-700'
     },
     3: {
-      title: 'PHẦN 3. TRẢ LỜI NGẮN',
+      title: 'PHẦN III. TRẢ LỜI NGẮN',
       desc: 'Điền đáp án số vào ô trống',
       gradient: 'from-orange-500 to-amber-600',
       border: 'border-orange-200',
       badge: 'bg-orange-100 text-orange-700'
     },
     4: {
-      title: 'PHẦN 4. TỰ LUẬN',
+      title: 'PHẦN IV. TỰ LUẬN',
       desc: 'Bài làm trình bày chi tiết của học sinh',
       gradient: 'from-violet-600 to-purple-700',
       border: 'border-violet-200',
@@ -507,10 +507,10 @@ const MultipleChoiceDetail = ({ question, userAnswer, displayIndex, maxPoints = 
         isCorrect ? 'bg-green-50' : userAnswer ? 'bg-red-50' : 'bg-gray-50'
       }`}>
         <div className="flex items-center gap-2">
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-white text-xs ${
+          <div className={`px-2.5 py-1 rounded-lg font-black text-white text-xs ${
             isCorrect ? 'bg-green-500' : userAnswer ? 'bg-red-500' : 'bg-gray-400'
           }`}>
-            {displayIndex}
+            Câu {displayIndex}
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
             isCorrect ? 'bg-green-100 text-green-700' : userAnswer ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
@@ -617,10 +617,10 @@ const TrueFalseDetail = ({ question, userAnswer, breakdown, displayIndex, maxPoi
         isPerfect ? 'bg-teal-50' : isPartial ? 'bg-yellow-50' : 'bg-gray-50'
       }`}>
         <div className="flex items-center gap-2">
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-white text-xs ${
+          <div className={`px-2.5 py-1 rounded-lg font-black text-white text-xs ${
             isPerfect ? 'bg-teal-500' : isPartial ? 'bg-yellow-500' : 'bg-gray-400'
           }`}>
-            {displayIndex}
+            Câu {displayIndex}
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
             isPerfect ? 'bg-teal-100 text-teal-700'
@@ -715,10 +715,10 @@ const ShortAnswerDetail = ({ question, userAnswer, displayIndex, maxPoints = 0 }
         isCorrect ? 'bg-orange-50' : userAnswer ? 'bg-red-50' : 'bg-gray-50'
       }`}>
         <div className="flex items-center gap-2">
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-white text-xs ${
+          <div className={`px-2.5 py-1 rounded-lg font-black text-white text-xs ${
             isCorrect ? 'bg-orange-500' : userAnswer ? 'bg-red-500' : 'bg-gray-400'
           }`}>
-            {displayIndex}
+            Câu {displayIndex}
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
             isCorrect ? 'bg-orange-100 text-orange-700' : userAnswer ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
@@ -763,8 +763,8 @@ const EssayDetail = ({ question, userAnswer, displayIndex, scoreDetail }) => {
       {/* Header */}
       <div className="px-4 py-2.5 flex items-center justify-between bg-violet-50">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-violet-500 flex items-center justify-center font-black text-white text-xs">
-            {displayIndex}
+          <div className="px-2.5 py-1 rounded-lg bg-violet-500 font-black text-white text-xs">
+            Câu {displayIndex}
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${hasContent ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-500'}`}>
             {hasContent ? (scoreDetail ? '✅ Đã chấm' : '📝 Đã làm · Chờ GV chấm') : '— Bỏ trống'}

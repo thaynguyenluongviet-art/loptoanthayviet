@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { FileUp, FileText, Trash2, RefreshCw, Eye, Edit2, Save, X, Settings, Download, BookOpen, Sparkles } from 'lucide-react'
 import { useExamStore } from '@/store/examStore'
 import { parseWordToExam } from '@/services/mathWordParserService'
@@ -14,6 +14,8 @@ import toast from 'react-hot-toast'
 import { EX_TEST_DETHI_TEMPLATE } from '@/constants'
 import { compileFullTex } from '@/services/api'
 import { uploadPdfToSupabase } from '@/services/supabaseService'
+import { getExamCategory, EXAM_CATEGORIES } from '@/lib/examCategories'
+import ExamCategoryTabs from '@/components/ExamCategoryTabs'
 
 export default function ExamMgmt() {
   const { exams, loading, loadExams, createExam, deleteExam, getExamData } = useExamStore()
@@ -504,15 +506,33 @@ export default function ExamMgmt() {
 
   const grades = [6, 7, 8, 9, 10, 11, 12]
 
+  // State lọc theo danh mục đề thi
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    EXAM_CATEGORIES.forEach(c => { counts[c.id] = 0 })
+    exams.forEach(e => {
+      const cat = getExamCategory(e.title)
+      counts[cat.id] = (counts[cat.id] || 0) + 1
+    })
+    return counts
+  }, [exams])
+
+  const filteredExams = useMemo(() => {
+    if (selectedCategory === 'all') return exams
+    return exams.filter(e => getExamCategory(e.title).id === selectedCategory)
+  }, [exams, selectedCategory])
+
   const examsByGrade: Record<string | number, any[]> = {
-    6: exams.filter(e => getExamGrade(e.title) === 6),
-    7: exams.filter(e => getExamGrade(e.title) === 7),
-    8: exams.filter(e => getExamGrade(e.title) === 8),
-    9: exams.filter(e => getExamGrade(e.title) === 9),
-    10: exams.filter(e => getExamGrade(e.title) === 10),
-    11: exams.filter(e => getExamGrade(e.title) === 11),
-    12: exams.filter(e => getExamGrade(e.title) === 12),
-    others: exams.filter(e => {
+    6: filteredExams.filter(e => getExamGrade(e.title) === 6),
+    7: filteredExams.filter(e => getExamGrade(e.title) === 7),
+    8: filteredExams.filter(e => getExamGrade(e.title) === 8),
+    9: filteredExams.filter(e => getExamGrade(e.title) === 9),
+    10: filteredExams.filter(e => getExamGrade(e.title) === 10),
+    11: filteredExams.filter(e => getExamGrade(e.title) === 11),
+    12: filteredExams.filter(e => getExamGrade(e.title) === 12),
+    others: filteredExams.filter(e => {
       const g = getExamGrade(e.title)
       return g === null
     })
@@ -545,6 +565,31 @@ export default function ExamMgmt() {
             <input type="file" accept=".tex" className="hidden" onChange={handleTexUpload} disabled={uploading} />
           </label>
         </div>
+      </div>
+
+      {/* 🌟 BẢNG DANH MỤC PHẦN ĐỀ THI ĐẸP MẮT & CHỈNH CHU 🌟 */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-teal-100 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-teal-50 text-teal-600">🏷️</span>
+            <div>
+              <h2 className="text-sm font-black text-gray-800 uppercase tracking-wide">
+                Danh Mục Đề Thi
+              </h2>
+              <p className="text-[11px] text-gray-500">Giữa kì I, Học kì I, Giữa kì II, Học kì II, Vào lớp 10, THPT Quốc Gia</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100">
+            Hiển thị: <strong>{filteredExams.length}</strong> / {exams.length} đề
+          </span>
+        </div>
+
+        <ExamCategoryTabs
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          categoryCounts={categoryCounts}
+          totalCount={exams.length}
+        />
       </div>
 
       {/* 4 Cột Khối Lớp */}
@@ -637,6 +682,17 @@ export default function ExamMgmt() {
                           </button>
                         </div>
                       )}
+                      {(() => {
+                        const cat = getExamCategory(exam.title);
+                        return (
+                          <div className="mb-1.5 flex items-center gap-1.5 flex-wrap">
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${cat.badgeBg}`}>
+                              <span>{cat.icon}</span>
+                              <span>{cat.name}</span>
+                            </span>
+                          </div>
+                        );
+                      })()}
                       <p className="text-[11px] text-gray-400 mb-2">
                         {fmt(new Date(exam.created_at), 'dd/MM/yyyy HH:mm')}
                       </p>
@@ -838,7 +894,7 @@ export default function ExamMgmt() {
       </Modal>
 
       {/* ✅ MODAL XEM TRƯỚC VÀ CHỈNH SỬA ĐỀ THI */}
-      <Modal open={!!previewData} onClose={() => { if(!savingEdit) setPreviewData(null); setEditingQuestionId(null); }} title={`Xem trước & Biên tập: ${previewData?.title}`} size="3xl">
+      <Modal open={!!previewData} onClose={() => { if(!savingEdit) setPreviewData(null); setEditingQuestionId(null); }} title={Xem trước & Biên tập: } size="3xl">
         <div className="space-y-8 max-h-[75vh] overflow-y-auto pr-2 bg-gray-50 p-4 rounded-xl">
           
           {[1, 2, 3, 4].map(part => {
@@ -850,10 +906,10 @@ export default function ExamMgmt() {
             if (questionsInPart.length === 0) return null;
 
             const partTitles: Record<number, { title: string, desc: string, color: string }> = {
-              1: { title: 'PHẦN 1. TRẮC NGHIỆM NHIỀU LỰA CHỌN', desc: 'Mỗi câu chọn 1 đáp án đúng (A, B, C, D)', color: 'bg-blue-600' },
-              2: { title: 'PHẦN 2. TRẮC NGHIỆM ĐÚNG/SAI', desc: 'Chọn Đúng hoặc Sai cho mỗi ý a, b, c, d', color: 'bg-emerald-600' },
-              3: { title: 'PHẦN 3. TRẢ LỜI NGẮN', desc: 'Điền đáp án số vào ô trống', color: 'bg-orange-600' },
-              4: { title: 'PHẦN 4. TỰ LUẬN', desc: 'Trình bày lời giải chi tiết', color: 'bg-violet-600' }
+              1: { title: 'PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN', desc: 'Mỗi câu chọn 1 đáp án đúng (A, B, C, D)', color: 'bg-blue-600' },
+              2: { title: 'PHẦN II. TRẮC NGHIỆM ĐÚNG/SAI', desc: 'Chọn Đúng hoặc Sai cho mỗi ý a, b, c, d', color: 'bg-emerald-600' },
+              3: { title: 'PHẦN III. TRẢ LỜI NGẮN', desc: 'Điền đáp án số vào ô trống', color: 'bg-orange-600' },
+              4: { title: 'PHẦN IV. TỰ LUẬN', desc: 'Trình bày lời giải chi tiết', color: 'bg-violet-600' }
             };
 
             const info = partTitles[part];
@@ -865,8 +921,8 @@ export default function ExamMgmt() {
                   <p className="text-sm opacity-90">{info.desc}</p>
                 </div>
 
-                {questionsInPart.map((q: any) => {
-                  const displayQNum = globalQuestionNumber++;
+                {questionsInPart.map((q: any, idx: number) => {
+                  const displayQNum = idx + 1;
                   const isEditingThis = editingQuestionId === q.number;
 
                   return (
@@ -875,8 +931,8 @@ export default function ExamMgmt() {
                       {/* Tiêu đề & Nút thao tác câu hỏi */}
                       <div className="flex justify-between items-start mb-4 border-b border-gray-50 pb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-teal-100 text-teal-700 font-bold rounded-full flex items-center justify-center flex-shrink-0">
-                            {displayQNum}
+                          <div className="px-3.5 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-black text-sm rounded-xl shadow-xs flex items-center justify-center flex-shrink-0">
+                            Câu {displayQNum}
                           </div>
                           <span className="text-xs text-gray-400 font-mono">ID: {q.number}</span>
                         </div>
@@ -912,10 +968,9 @@ export default function ExamMgmt() {
                       {/* CHẾ ĐỘ XEM THƯỜNG */}
                       {!isEditingThis ? (
                         <div className="space-y-4">
-                          <div className="pl-12">
-                            <MathText html={q.text} block className="text-gray-800 font-medium text-base leading-relaxed" />
-                            {q.images?.map((img: any, idx: number) => (
-                              <img 
+                          <div className="pl-2 sm:pl-4">
+                          <div className="pl-4 sm:pl-6">
+                            <MathText html={q.text?.replace(/^C(?:\u00e2u|au)\s*\d+[\s.:]*/i, '') || ''} block className="text-gray-800 font-medium text-base leading-relaxed" />
                                 key={idx} 
                                 src={img.base64 ? `data:${img.contentType || 'image/png'};base64,${img.base64}` : `data:image/png;base64,${img.data}`} 
                                 className="max-h-64 mt-3 rounded-lg border border-gray-200 shadow-sm" 

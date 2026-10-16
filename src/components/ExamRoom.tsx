@@ -267,26 +267,36 @@ const ExamRoom: React.FC<ExamRoomProps> = ({ room, exam, student, existingSubmis
     const sa = exam.questions.filter(q => q.type === 'short_answer');
     const wr = exam.questions.filter(q => q.type === 'writing');
 
-    let runningIndex = 0;
-
     if (mc.length > 0) {
-      groups.push({ part: 1, title: 'PHẦN 1. TRẮC NGHIỆM', desc: 'Chọn một phương án đúng A, B, C hoặc D',
-        questions: mc.map(q => ({ q, displayNum: ++runningIndex }))
+      groups.push({
+        part: 1,
+        title: 'PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN',
+        desc: 'Mỗi câu chọn 1 đáp án đúng (A, B, C, D)',
+        questions: mc.map((q, idx) => ({ q, displayNum: idx + 1 }))
       });
     }
     if (tf.length > 0) {
-      groups.push({ part: 2, title: 'PHẦN 2. ĐÚNG SAI', desc: 'Chọn Đúng hoặc Sai cho mỗi mệnh đề',
-        questions: tf.map(q => ({ q, displayNum: ++runningIndex }))
+      groups.push({
+        part: 2,
+        title: 'PHẦN II. TRẮC NGHIỆM ĐÚNG/SAI',
+        desc: 'Chọn Đúng hoặc Sai cho mỗi ý a, b, c, d',
+        questions: tf.map((q, idx) => ({ q, displayNum: idx + 1 }))
       });
     }
     if (sa.length > 0) {
-      groups.push({ part: 3, title: 'PHẦN 3. TRẢ LỜI NGẮN', desc: 'Điền đáp án số vào ô trống',
-        questions: sa.map(q => ({ q, displayNum: ++runningIndex }))
+      groups.push({
+        part: 3,
+        title: 'PHẦN III. TRẢ LỜI NGẮN',
+        desc: 'Điền đáp án số vào ô trống',
+        questions: sa.map((q, idx) => ({ q, displayNum: idx + 1 }))
       });
     }
     if (wr.length > 0) {
-      groups.push({ part: 4, title: 'PHẦN 4. TỰ LUẬN', desc: 'Viết bài giải chi tiết, đính kèm ảnh chụp',
-        questions: wr.map(q => ({ q, displayNum: ++runningIndex }))
+      groups.push({
+        part: 4,
+        title: 'PHẦN IV. TỰ LUẬN',
+        desc: 'Trình bày lời giải chi tiết',
+        questions: wr.map((q, idx) => ({ q, displayNum: idx + 1 }))
       });
     }
 
@@ -504,7 +514,7 @@ const QuestionCard: React.FC<any> = ({ question, displayNum, userAnswer, onChang
 
       <div className="px-5 py-4">
         {/* Nội dung câu hỏi */}
-        <MathText html={question.text || ''} className="text-gray-800 leading-relaxed text-[15px] mb-3" block />
+        <MathText html={question.text?.replace(/^C(?:\u00e2u|au)\s*\d+[\s.:]*/i, '') || ''} className="text-gray-800 leading-relaxed text-[15px] mb-3" block />
         
         {imageUrls.map((url: string, idx: number) => (
           <img key={idx} src={url} alt={`Hình ${idx + 1}`} className="max-w-full h-auto mt-3 mb-4 rounded-lg border border-gray-200 mx-auto max-h-[300px]" />

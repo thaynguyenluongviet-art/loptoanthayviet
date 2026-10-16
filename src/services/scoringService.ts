@@ -81,10 +81,10 @@ export function detectSections(questions: Question[]): SectionPointsConfig[] {
 
   sectionMap.forEach((data, sectionKey) => {
     const sectionNames: Record<number, string> = {
-      1: 'PHẦN 1. TRẮC NGHIỆM NHIỀU LỰA CHỌN',
-      2: 'PHẦN 2. TRẮC NGHIỆM ĐÚNG SAI',
-      3: 'PHẦN 3. TRẢ LỜI NGẮN',
-      4: 'PHẦN 4. TỰ LUẬN'
+      1: 'PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN',
+      2: 'PHẦN II. TRẮC NGHIỆM ĐÚNG SAI',
+      3: 'PHẦN III. TRẢ LỜI NGẮN',
+      4: 'PHẦN IV. TỰ LUẬN'
     };
     sections.push({
       sectionId: sectionKey,
@@ -320,8 +320,23 @@ export function calculateScore(
   breakdown.totalScore = parseFloat(total.toFixed(4));
 
   const maxScore = config?.maxScore || 10;
-  const pct = Math.round((breakdown.totalScore / maxScore) * 100);
-  breakdown.percentage = Math.max(0, Math.min(100, pct));
+
+  // ✅ Đảm bảo học sinh làm đúng tất cả các câu sẽ luôn được tròn 10.0 điểm
+  const hasQuestions = (breakdown.multipleChoice.total + breakdown.trueFalse.total + breakdown.shortAnswer.total) > 0;
+  const allMCCorrect = breakdown.multipleChoice.total === 0 || breakdown.multipleChoice.correct === breakdown.multipleChoice.total;
+  const allTFCorrect = breakdown.trueFalse.total === 0 || (breakdown.trueFalse.correct === breakdown.trueFalse.total && breakdown.trueFalse.partial === 0);
+  const allSACorrect = breakdown.shortAnswer.total === 0 || breakdown.shortAnswer.correct === breakdown.shortAnswer.total;
+
+  if (hasQuestions && allMCCorrect && allTFCorrect && allSACorrect) {
+    breakdown.totalScore = maxScore;
+    breakdown.percentage = 100;
+  } else {
+    if (breakdown.totalScore > maxScore || Math.abs(breakdown.totalScore - maxScore) < 0.01) {
+      breakdown.totalScore = maxScore;
+    }
+    const pct = Math.round((breakdown.totalScore / maxScore) * 100);
+    breakdown.percentage = Math.max(0, Math.min(100, pct));
+  }
 
   return breakdown;
 }

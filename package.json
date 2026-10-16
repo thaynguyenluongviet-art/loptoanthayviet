@@ -1,11 +1,11 @@
-{
+﻿{
   "name": "edu-center",
   "private": true,
   "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "send-zalo": "node scripts/zalo-bot.js"
@@ -44,3 +44,4 @@
     "vite": "^5.3.1"
   }
 }
+

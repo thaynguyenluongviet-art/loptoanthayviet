@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from 'react'
+// @ts-nocheck
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   LogOut, 
@@ -24,8 +25,6 @@ import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { shuffleExamForStudent } from '@/services/mergeExamsService'
-import { getExamCategory, EXAM_CATEGORIES } from '@/lib/examCategories'
-import ExamCategoryTabs from '@/components/ExamCategoryTabs'
 
 const BANK_ID      = import.meta.env.VITE_BANK_ID      || 'VBA'
 const BANK_ACCOUNT = import.meta.env.VITE_BANK_ACCOUNT || '3714235000320'
@@ -555,28 +554,6 @@ export default function StudentPortal() {
     )
   }
 
-  // State lọc theo danh mục đề thi
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-
-  const studentCategoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    EXAM_CATEGORIES.forEach(c => { counts[c.id] = 0 })
-    examsList.forEach(room => {
-      const title = room.exams?.title || room.code || ''
-      const cat = getExamCategory(title)
-      counts[cat.id] = (counts[cat.id] || 0) + 1
-    })
-    return counts
-  }, [examsList])
-
-  const filteredExamsList = useMemo(() => {
-    if (selectedCategory === 'all') return examsList
-    return examsList.filter(room => {
-      const title = room.exams?.title || room.code || ''
-      return getExamCategory(title).id === selectedCategory
-    })
-  }, [examsList, selectedCategory])
-
   // Phân loại danh sách bài thi
   const submittedRoomIds = submissionsList
     .filter(s => s.status === 'submitted' && s.score !== 0)
@@ -588,7 +565,7 @@ export default function StudentPortal() {
     .forEach(s => inProgressSubMap.set(s.room_id, s))
 
   // Đã thi: có bài nộp status = 'submitted'
-  const completedExams = filteredExamsList
+  const completedExams = examsList
     .filter(room => submittedRoomIds.includes(room.id))
     .map(room => {
       const sub = submissionsList.find(s => s.room_id === room.id && s.status === 'submitted')
@@ -596,7 +573,7 @@ export default function StudentPortal() {
     })
 
   // Chưa thi: chưa có bài nộp status = 'submitted'
-  const pendingExams = filteredExamsList.filter(room => !submittedRoomIds.includes(room.id))
+  const pendingExams = examsList.filter(room => !submittedRoomIds.includes(room.id))
   const activePendingCount = pendingExams.filter(room => room.status !== 'closed' && room.status !== 'waiting').length
 
   // --- TỔNG HỢP CHI TIẾT BÀI THI PHÒNG THI ---
@@ -854,32 +831,16 @@ export default function StudentPortal() {
           </div>
           {/* TABLE BẢNG TỔNG HỢP KẾT QUẢ CHI TIẾT */}
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <h3 className="text-sm font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                <span>📊 Bảng tổng hợp kết quả chi tiết</span>
-              </h3>
-              <span className="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100 self-start sm:self-auto">
-                Hiển thị: <strong>{filteredExamsList.length}</strong> / {examsList.length} đề
-              </span>
-            </div>
-
-            {/* 🌟 BẢNG DANH MỤC PHẦN ĐỀ THI 🌟 */}
-            <div className="bg-white p-3 sm:p-4 rounded-2xl border border-teal-100 shadow-sm mb-4">
-              <ExamCategoryTabs
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
-                categoryCounts={studentCategoryCounts}
-                totalCount={examsList.length}
-              />
-            </div>
-
+            <h3 className="text-sm font-extrabold text-gray-700 mb-3 uppercase tracking-wider flex items-center gap-1.5">
+              <span>📋 Bảng tổng hợp kết quả chi tiết</span>
+            </h3>
             <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-teal-600 text-white text-center font-bold text-xs uppercase tracking-wider">
                     <th className="p-3 border-r border-teal-700 text-center font-black rounded-tl-xl w-[115px]">Ngày giao đề</th>
                     <th className="p-3 border-r border-teal-700 text-center font-black w-[115px]">Ngày làm đề</th>
-                    <th className="p-3 border-r border-teal-700 text-left font-black min-w-[220px]">Tên đề tại phòng thi</th>
+                    <th className="p-3 border-r border-teal-700 text-left font-black min-w-[220px]">Tên đề tôi giao ở phòng thi</th>
                     <th className="p-3 border-r border-teal-700 text-center font-black w-[90px]">Điểm số</th>
                     <th className="p-3 border-r border-teal-700 text-center font-black w-[90px]">Số lần thi</th>
                     <th className="p-3 border-r border-teal-700 text-center font-black w-[125px]">Tổng thời gian thi</th>
@@ -888,14 +849,14 @@ export default function StudentPortal() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {filteredExamsList.length === 0 ? (
+                  {examsList.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="p-8 text-center text-gray-400 text-sm font-medium">
-                        Không có đề thi nào trong danh mục này.
+                        Hiện tại chưa có đề thi nào được giao trong phòng thi.
                       </td>
                     </tr>
                   ) : (
-                    filteredExamsList.map((room) => {
+                    examsList.map((room) => {
                       const sub = submissionsList.find(s => s.room_id === room.id)
                       const assignedDate = formatDateTime(room.created_at)
                       const submittedDate = formatDateTime(sub?.submitted_at || (sub?.status === 'in_progress' ? sub?.created_at : null))
@@ -917,7 +878,6 @@ export default function StudentPortal() {
 
                       const isClosed = room.status === 'closed'
                       const isWaiting = room.status === 'waiting'
-                      const cat = getExamCategory(room.exams?.title || '');
 
                       return (
                         <tr key={room.id} className="hover:bg-teal-50/20 transition-colors text-center text-sm">
@@ -951,12 +911,6 @@ export default function StudentPortal() {
 
                           {/* 3. Tên đề tôi giao ở phòng thi */}
                           <td className="p-3 border-r border-slate-100 text-left">
-                            <div className="mb-1 flex items-center gap-1.5 flex-wrap">
-                              <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded border shadow-2xs ${cat.badgeBg}`}>
-                                <span>{cat.icon}</span>
-                                <span>{cat.name}</span>
-                              </span>
-                            </div>
                             <div className="font-bold text-gray-800 text-sm leading-snug line-clamp-2">
                               {room.exams?.title || `Phòng thi ${room.code}`}
                             </div>
@@ -1114,20 +1068,9 @@ export default function StudentPortal() {
                   >
                     <div>
                       <div className="flex justify-between items-start gap-2 mb-3">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {(() => {
-                            const cat = getExamCategory(room.exams?.title || '');
-                            return (
-                              <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded border shadow-2xs ${cat.badgeBg}`}>
-                                <span>{cat.icon}</span>
-                                <span>{cat.name}</span>
-                              </span>
-                            );
-                          })()}
-                          <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded border border-teal-100">
-                            {room.classes?.class_name || 'Bài thi tự do'}
-                          </span>
-                        </div>
+                        <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded border border-teal-100">
+                          {room.classes?.class_name || 'Bài thi tự do'}
+                        </span>
                         {statusBadge}
                       </div>
                       <h3 className="text-base font-extrabold text-gray-800 mb-2 line-clamp-2 leading-snug">

@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { EXAM_CATEGORIES, ExamCategory } from '@/lib/examCategories';
 
 interface ExamCategoryTabsProps {
@@ -9,7 +9,7 @@ interface ExamCategoryTabsProps {
   className?: string;
 }
 
-export const ExamCategoryTabs: React.FC<ExamCategoryTabsProps> = ({
+export const ExamCategoryTabs: FC<ExamCategoryTabsProps> = ({
   selectedCategory,
   onSelectCategory,
   categoryCounts = {},
@@ -52,7 +52,7 @@ export const ExamCategoryTabs: React.FC<ExamCategoryTabsProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 border shadow-xs ${
                 isSelected
                   ? `bg-gradient-to-r ${cat.gradient} text-white ${cat.borderColor} shadow-md scale-[1.02]`
-                  : `bg-white text-gray-700 border-gray-200 hover:${cat.borderColor} hover:bg-slate-50`
+                  : `bg-white text-gray-700 border-gray-200 hover:border-teal-300 hover:bg-slate-50`
               }`}
             >
               <span>{cat.icon}</span>

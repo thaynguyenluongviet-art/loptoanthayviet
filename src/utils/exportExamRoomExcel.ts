@@ -110,10 +110,15 @@ export async function exportExamRoomToExcel(room: {
         (sb.shortAnswer?.total || 0) ||
       0
 
-    const scoreNum =
+    let scoreNum =
       typeof sub.score === 'number'
         ? Math.round(sub.score * 100) / 100
         : Number(sub.score || 0)
+
+    const maxScore = examData?.pointsConfig?.maxScore || 10
+    if ((totalQCount > 0 && (sub.correct_count ?? computedCorrectCount) === totalQCount) || scoreNum >= 9.98) {
+      scoreNum = maxScore
+    }
 
     return {
       studentCode: sub.students?.student_code || '—',

@@ -256,9 +256,12 @@ export default function ExamResultsPage() {
               {/* Học sinh đã nộp bài / đang làm */}
               {[...submissions]
                 .sort((a, b) => {
-                  const scoreA = a.score ?? -1
-                  const scoreB = b.score ?? -1
-                  return scoreB - scoreA
+                  const getEffScore = (s: any) => {
+                    const sc = s.score ?? -1
+                    if (sc >= 9.98) return 10
+                    return sc
+                  }
+                  return getEffScore(b) - getEffScore(a)
                 })
                 .map((sub) => {
                   const sb = sub.score_breakdown || {}
@@ -332,7 +335,11 @@ export default function ExamResultsPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-center font-bold text-teal-600 text-lg">
-                        {sub.score != null ? sub.score.toFixed(2) : '—'}
+                        {sub.score != null
+                          ? ((totalQCount > 0 && computedCorrectCount === totalQCount) || sub.score >= 9.98
+                              ? (room?.exams?.data?.pointsConfig?.maxScore || 10).toFixed(2)
+                              : sub.score.toFixed(2))
+                          : '—'}
                       </td>
                       <td className="px-6 py-4 text-center text-gray-600">
                         {sub.status === 'submitted'
